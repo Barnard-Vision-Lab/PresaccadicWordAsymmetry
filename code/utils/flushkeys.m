@@ -1,0 +1,1 @@
+function []=flushkeyskeyIsDown = 1;while keyIsDown	[keyIsDown, stopSecs, keyCode] = KbCheck;end 
