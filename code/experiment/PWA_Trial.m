@@ -52,28 +52,11 @@ end
 ts = task.trialStruct;
 
 %How many responses to get from this trial
-nResps = 1 + (td.cueCond == 0 && task.dualTaskBothResps);
+nResps = 1;
 
 targCatgs = [td.side1Category td.side2Category];
 
-if nResps == 2
-    targSides = [td.targSide 3-td.targSide];
-else %if this is a single-task trial, set the response2 and postcue2 intervals to have 0 duration, so they get skipped. 
-    targSides = td.targSide;
-    %get rid of the "respone2" and "postCue2" intervals by setting their
-    %durations to 0 
-    ri = strcmp(ts.segmentNames,'response2');
-    pi = strcmp(ts.segmentNames,'postCue2');
-    ts.durations(ri | pi) = 0;
-    
-    %Second try to skip those second postcue and response segments: just
-    %set the end segment before them. This assumes those are the last
-    %segments in the trial! 
-    ts.nSegments = ts.nSegments - 2; 
-    
-end
-
-targCatgs = targCatgs(targSides);
+targCatgs = targCatgs(td.targSide);
 
 %Draw fixation parameters:
 fixPos = 1;
@@ -87,10 +70,10 @@ tTrialStart      = GetSecs;
 segment          = 0; %start counter of segments
 fri              = 0; %counter of movie frames
 segStartTs       = NaN(1, ts.nSegments);
-chosenRes        = NaN(1,2);
-respCorrect      = NaN(1,2);
-tResTone         = NaN(1,2);
-tRes             = NaN(1,2);
+chosenRes        = NaN;
+respCorrect      = NaN;
+tResTone         = NaN;
+tRes             = NaN;
 tFeedback        = NaN;
 fixBreak         = 0;
 nFixBreaks       = 0;
@@ -119,6 +102,15 @@ updateSegment = true; %start 1st segment immediately
 
 doStimLoop = true;
 
+%parameters for marker: 
+%during pre-cue, both sides, both pre-cue color
+preCueMarkerSides = 1:2;
+preCueMarkerColrs = [1 1]; 
+%during post-cue, both sides, but target side is post-cue color
+
+postCueMarkerSides = 1:2;
+postCueMarkerColrs = [1 1];
+postCueMarkerColrs(td.targSide) = 2;
 
 while doStimLoop
     % Time counter
@@ -166,45 +158,52 @@ while doStimLoop
 
         
         switch segmentName
-            case {'fixation','cueStimISI','stimMaskISI','maskRespISI'}
-                %do nothing except fixation mark 
-
+            case 'fixation'
+                %fixation mark and pre-masks
+                for si = 1:2
+                    Screen('DrawTexture', scr.main, task.maskTextures(td.blockNum, td.originalBlockTrialNum, si), [], squeeze(task.maskRects(td.blockNum, td.originalBlockTrialNum, si, :)));
+                end
+                
+                %and markers 
+                drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
             case 'preCue'
-                drawCues(task, scr, abs(td.cueCond));
+                %pre-masks
+                for si = 1:2
+                    Screen('DrawTexture', scr.main, task.maskTextures(td.blockNum, td.originalBlockTrialNum, si), [], squeeze(task.maskRects(td.blockNum, td.originalBlockTrialNum, si, :)));
+                end
 
+                %marker
+                drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
+                
+                %central cue
+                drawCues_PWA(task, scr, td.cuedSide, true);
+                
             case 'stimuli'
                 %draw two letter strings 
                 for si=1:2
                     Screen('DrawTexture', scr.main, task.stringTextures(td.blockNum, td.originalBlockTrialNum, si), [], squeeze(task.stringRects(td.blockNum, td.originalBlockTrialNum, si, :)));
                 end
                 
-            case 'postMasks'
-                for si = 1:2
-                    Screen('DrawTexture', scr.main, task.maskTextures(td.blockNum, td.originalBlockTrialNum, si), [], squeeze(task.maskRects(td.blockNum, td.originalBlockTrialNum, si, :)));
-                end
+                %marker
+                drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
                 
-            case 'postCue1'
-                drawCues(task, scr, targSides(1));
-
+                %central cue
+                drawCues_PWA(task, scr, td.cuedSide, true);
                 
-            case 'response1'
-                respI = 1;
-                %play beep to prompt response
-                tResTone(respI) = playPTB_DataPixxSound(1, task);
-
-                drawCues(task, scr, targSides(1));
-
-                                
-            case 'postCue2'
-                drawCues(task, scr, targSides(2));
-
+            case 'stimPostcueISI'
+                 %marker
+                drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
                 
-            case 'response2'
-                respI = 2;
-                drawCues(task, scr, targSides(2));
+                %central cue
+                %drawCues_PWA(task, scr, td.cuedSide, true);
+                
+                
+            case 'postCue'
+                 %marker
+                drawMarkers_PWA(task, scr, postCueMarkerSides, postCueMarkerColrs);
+                
+                drawCues_PWA(task, scr, td.targSide, false);
 
-                %play beep to prompt response 
-                tResTone(respI) = playPTB_DataPixxSound(1, task);
         end
         
        
@@ -240,13 +239,13 @@ while doStimLoop
         %this was the first time keypress detected
         if keyPressed>0 && ~thisSegKeyPressed %only record first keypress 
             
-            chosenRes(respI) = keyPressed;
+            chosenRes = keyPressed;
             if keyPressed ~= task.buttons.quit
                 %only accept key press for the correct side
-                if task.buttons.side(keyPressed) == targSides(respI)
+                if task.buttons.side(keyPressed) == td.targSide
                     
-                    tRes(respI) = tKey;
-                    respCorrect(respI) = task.buttons.reportedCategory(keyPressed) == targCatgs(respI);
+                    tRes = tKey;
+                    respCorrect = task.buttons.reportedCategory(keyPressed) == targCatgs;
                     thisSegKeyPressed = true;
                     endSegment = task.selfPaced;
                     
@@ -374,9 +373,7 @@ elseif nPressedQuit<2
     if task.feedback     
         for rsi = find(~isnan(respCorrect))
             tFeedback(rsi) = playPTB_DataPixxSound(2+~respCorrect(rsi), task);
-            if nResps==2 && rsi==1
-                WaitSecs(task.durations.delayBetweenBeeps);
-            end
+            
         end
     end
     
@@ -399,18 +396,15 @@ for segI = 1:ts.nSegments
 end
 
 trialRes.tTrialStart = tTrialStart;
-trialRes.tRes1 = tRes(1) - tTrialStart;
-trialRes.tRes2 = tRes(2) - tTrialStart;
+trialRes.tRes = tRes - tTrialStart;
 
 trialRes.tFeedback = tFeedback(1) - tTrialStart;
 trialRes.fixBreak = 1*fixBreak; %convert from logical to to double
 trialRes.nFixBreakSegs = nFixBreaks;
 trialRes.tFixBreak = tFixBreak - tTrialStart;
 trialRes.userQuit = 1*(nPressedQuit>1);
-trialRes.chosenRes1 = chosenRes(1);
-trialRes.chosenRes2 = chosenRes(2);
-trialRes.respCorrect1 = 1*respCorrect(1);
-trialRes.respCorrect2 = 1*respCorrect(2);
+trialRes.chosenRes = chosenRes;
+trialRes.respCorrect = 1*respCorrect;
 trialRes.trialDone = trialDone && ~trialRes.userQuit;
 
 %did the subject not respond in time? 

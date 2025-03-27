@@ -31,8 +31,7 @@ end
 
 %% then counterbalance key variables 
 design.parameters.targSide              = 1:2;
-design.parameters.cueFocused            = [1 1 1 0 0];
-design.parameters.cueValidity           = [-1 1 1];
+design.parameters.cueValidity           = [-1 0 0 1 1]; %-1=invalid; 0=neutral; 1=valid
 design.parameters.side1Category         = 1:2; %1=nonliving; 2 = living;
 design.parameters.side2Category         = 1:2; 
 
@@ -41,6 +40,12 @@ design.parameters.side2Category         = 1:2;
 
 %create the runTrials table from blockInfo and this new table trls
 task.runTrials = [blockInfo trls];
+
+%add cuedSide: 0 for neutral, 1 for left, 2 for right. Depends on
+%cueValidity. 
+task.runTrials.cuedSide = task.runTrials.targSide; %start with cue on same side as target word 
+task.runTrials.cuedSide(task.runTrials.cueValidity==0) = 0; %neutral trials its 0
+task.runTrials.cuedSide(task.runTrials.cueValidity==-1) = 3-task.runTrials.targSide(task.runTrials.cueValidity==-1); %invalid trials its opposite of targSide (1 for 2 and 2 for 1).  
 
 
 totalTrials = size(task.runTrials,1);

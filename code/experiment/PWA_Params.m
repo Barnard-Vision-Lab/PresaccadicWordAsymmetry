@@ -12,7 +12,7 @@ params.strings.contrast           = -1;
 params.strings.xHeightDeg         = 0.6;
 params.strings.antiAlias          = 0;
 
-params.strings.centerEcc          = 2.75;  
+params.strings.centerEcc          = 3;  
 params.strings.posPolarAngles     = [180 0]; %left, right
 params.strings.posLabels          = {'Left','Right'};
 
@@ -62,14 +62,9 @@ params.fixation.dotColor = [255 255 255];
 
 %% SPATIAL CUES
 
-%cueColors:  
-hues = [0.33];   
-sats = [1];
-vals = [0.66]; 
-
-params.cue.color_pre        = round(255*hsv2rgb([hues' sats' vals']));
+params.cue.color_pre        = round(255*hsv2rgb([0.33 1 0.66]));
 params.cue.neutralColor     = params.cue.color_pre;
-params.cue.color_post       = round(255*hsv2rgb([0.9 1 0.66]));
+params.cue.color_post       = round(255*hsv2rgb([0.65 1 0.66]));
 params.cue.posPolarAngles   = params.strings.posPolarAngles;
 params.cue.thick            = 4;
 params.cue.length           = 0.16;
@@ -80,12 +75,12 @@ params.cue.maxEcc           = params.cue.minEcc+params.cue.length;
 params.dualTaskBothResps = true;
 
 %% markers for saccade endpoints
-params.marker.color      = params.cue.color_pre;
+params.marker.colors         = [params.cue.color_pre; params.cue.color_post];
 params.marker.posPolarAngles = params.strings.posPolarAngles;
-params.marker.distH       = 2.75; %absolute value of horizontal distance from screen center
-params.marker.distY       = [0.6 1.0]; %absolute value of start and end distances from horizontal midline 
-params.marker.thick      = params.cue.thick;
-params.marker.length     = abs(diff(params.marker.distY));
+params.marker.distH          = params.strings.centerEcc; %absolute value of horizontal distance from screen center
+params.marker.distY          = [0.6 0.9]; %absolute value of start and end distances from horizontal midline [deg]
+params.marker.thick          = 3;
+params.marker.length         = abs(diff(params.marker.distY));
 
 %% Eyetracking 
 % initlFixCheckRad: 
@@ -123,10 +118,10 @@ trialSegs = {'fixation','preCue','stimuli','stimPostcueISI','postCue'};
 params.trialSegments = trialSegs;
 
 params.time.fixation            = 0.500;
-params.time.preCue              = 0.100; %[0.050 0.200]; %min max
+params.time.preCue              = 0.150; %[0.050 0.200]; %min max
 params.time.stimuli             = 0.075;  
-params.time.stimPostcueISI      = 0.050; %lasts until response
-params.time.postCue             = inf; 
+params.time.stimPostcueISI      = 0.200; 
+params.time.postCue             = inf; %lasts until response
 
 params.time.demoStimDur         = 0.150;
 

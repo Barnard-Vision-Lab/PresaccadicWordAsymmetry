@@ -91,18 +91,35 @@ end
 task.cue.allcoords = round(task.cue.allcoords);
 
 %% saccade endpoint markers
-%rows = left, right 
-%columns = top, bottom
-%3rd dim = startpoint, endpoint 
-task.marker.coordX = NaN(2,2,2);
-task.marker.coordY = NaN(2,2,2);
-mY = [-1 1];
-for si=1:2
-    task.marker.coordX(si,:,:) = round(scr.centerX+scr.ppd*task.marker.distH*cosd(task.marker.posPolarAngles(si)));
-    for tb = 1:2
-        task.marker.coordY(si,tb,:) = round(scr.centerY - scr.ppd*task.marker.distY*mY(tb));
+
+%make "allcoords" - a 2x8 matrix, with x-positions in row 1 and y-positions in row 2 
+%then columns are: 
+% [side1topstart side1topend side1bottomstart side1bottomend side2topstart side2topend side2botstart side2botend
+%these are drawn relative to scr.centerX and scr.centerY, so we dont have
+%to subtract those center coords out here
+task.marker.allcoords = NaN(2,8);
+
+dY = [1 -1]; %change in y for top, bottom
+startIs = [1 3; 5 7]; %rows = left/right; cols = top/bottom 
+endIs = [2 4; 6 8]; 
+
+for si=1:2 %left, right
+    for ti=1:2 %top, bottom 
+        %start x
+        task.marker.allcoords(1,startIs(si,ti)) = round(scr.ppd*task.marker.distH*cosd(task.marker.posPolarAngles(si)));
+        %end x - same
+        task.marker.allcoords(1,endIs(si,ti)) = round(scr.ppd*task.marker.distH*cosd(task.marker.posPolarAngles(si)));
+
+        %start y
+        task.marker.allcoords(2,startIs(si,ti)) = round(dY(ti)*scr.ppd*task.marker.distY(1));
+        task.marker.allcoords(2,endIs(si,ti)) = round(dY(ti)*scr.ppd*task.marker.distY(2));
+
     end
 end
+
+task.marker.startIsBySides = startIs;
+task.marker.endIsBySides = startIs;
+task.marker.colsBySides = [1 2 3 4; 5 6 7 8];
 
 %% eyetracking 
 task.fixCkRad = round(task.fixCheckRad*scr.ppd);   % fixation check radius

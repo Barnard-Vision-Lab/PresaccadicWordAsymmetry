@@ -119,7 +119,6 @@ while doRunTrials
         
         [trialRes, task] = PWA_Trial(scr,task,td,el,trialGoalStart);
         
-        trialRes.stimMaskISI = thisISI;
         
         if ti==1
             blockRes.blockStartTime = trialRes.tTrialStart;
@@ -146,10 +145,7 @@ while doRunTrials
             task.trials.overallTrialNum(nTrials) = max(task.trials.overallTrialNum)+1;
         end
         
-        %update staircase
-        if task.doStair && trialRes.trialDone && td.trialNum>task.stair.trialsIgnored 
-            [task] = updateStaircase(task, td, trialRes);
-        end
+        
         
     end
     %never terminate based on staircases finishing
@@ -220,10 +216,6 @@ if task.EYE>0
 end
 
 
-%% if staircase, analyze
-if task.doStair
-    task = extractStaircaseData(task);
-end
 
 %% save data
 save(sprintf('%s.mat',matFileName),'task','scr');

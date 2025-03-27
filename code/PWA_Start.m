@@ -1,11 +1,11 @@
-% START A RUN OF THE LEFT-RIGHT SEMANTIC CATEGORIZATION EXPERIMENT 
-% This version: post-masks are consonant strings. SCLR_Cons_Spaced2: inner
-% edge ecccentricity increased even further! 
+% START A RUN OF THE PRESACCADIC WORD ASYMMETRY (PWA) EXPERIMENT 
+
 clear all;
 
 %% to do 
-% - start with Trial function, make markers, then saccade detection and
+% - start with Trial function, so saccade detection and
 % timing
+% - set word position in units of letter spaces
 % - list of pseudowords
 % - make only 1 real word per trial and 1 pseudoword 
 % - make precue interval variable 

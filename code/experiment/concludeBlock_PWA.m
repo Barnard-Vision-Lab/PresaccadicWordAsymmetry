@@ -23,8 +23,8 @@ if blockNum < task.numBlocks
     quitText = '(or press ''q'' if you must quit early)';
         
     %print out accuracy on all single-task trials done this run so far
-    if task.singleTaskNTrials>0    
-        accText = sprintf('Single-task percent correct = %.1f%% (%i trials)', task.singleTaskPCSoFar*100, task.singleTaskNTrials);
+    if task.ntrialsDone>0    
+        accText = sprintf('Percent correct = %.1f%% (%i trials)', task.pcSoFar*100, task.ntrialsDone);
     else
         accText = '  ';
     end

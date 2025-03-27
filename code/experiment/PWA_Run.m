@@ -127,9 +127,8 @@ while doRunBlocks
     doneTrials = [doneTrials; task.trials]; 
     
     %compute single-task accuracy so far, for printing out in concludeBlock
-    singleTaskTrials = doneTrials(doneTrials.cueCond>0, :);
-    task.singleTaskPCSoFar = nanmeanAW([singleTaskTrials.respCorrect1(:); singleTaskTrials.respCorrect2(:)]);
-    task.singleTaskNTrials = sum(~isnan(singleTaskTrials.respCorrect1));
+    task.pcSoFar = mean(doneTrials.respCorrect,'omitnan');
+    task.ntrialsDone = sum(~isnan(doneTrials.respCorrect));
     
     %extract block data
     ds = fieldnames(blockRes);
@@ -204,11 +203,6 @@ if ~task.practice
     end
 end
 
-%% if staircase, analyze
-if task.doStair
-    [task, stairRes] = saveRunStaircaseData_PWA(task, doneTrials);
-    runData.stair = task.stair;
-end
 
 %% save run data
 if ~task.practice
