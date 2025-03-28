@@ -9,10 +9,12 @@ params.bgLum                    = 1;
 %% LETTER STRINGS
 params.strings.fontName           = 'Courier New';
 params.strings.contrast           = -1;
-params.strings.xHeightDeg         = 0.6;
+params.strings.xHeightDeg         = 0.55;
 params.strings.antiAlias          = 0;
 
-params.strings.centerEcc          = 3;  
+%center position of words in units of letter spaces from fixation 
+%(later converted to degrees and then pixels)
+params.strings.centerEcc_spaces   = 4;
 params.strings.posPolarAngles     = [180 0]; %left, right
 params.strings.posLabels          = {'Left','Right'};
 
@@ -27,7 +29,7 @@ params.strings.color               = ones(1,3)*round(params.strings.lum*255);
 %STIMULUS SET
 params.strings.lengths            = [5 6];
 %Load stimulus set from csv file. 
-params.strings.listFile = fullfile(params.paths.stimuli,'PosSC.csv');
+params.strings.listFile = fullfile(params.paths.stimuli,'PWA_StimSet.csv');
 params.strings.lexicon = readtable(params.strings.listFile);
 
 %filter by lengths
@@ -37,6 +39,9 @@ params.strings.lexicon.stringNum = (1:size(params.strings.lexicon, 1))';
 params.strings.categories        = flipud(unique(params.strings.lexicon.category)); 
 params.strings.nCatg             = numel(params.strings.categories); 
 params.strings.nLeng             = length(params.strings.lexicon.length);
+
+[~,params.strings.realWordCatgs] = ismember({'NonLiving','Living'},  params.strings.categories);
+params.strings.pseudowordCatg = find(strcmp(params.strings.categories, 'Pseudoword'));
 
 params.strings.maskFontName =   'BACS2serif';
 
@@ -61,6 +66,10 @@ params.fixation.dotType          = 2; % 0 (default) squares, 1 circles (with ant
 params.fixation.dotColor = [255 255 255];
 
 %% SPATIAL CUES
+%what proportion of blocks are saccade/cued vs fixation/neutrla
+params.blockCueDistribution  = [0 0 1 1 1];
+%what proportion of cued trials are valid? 
+params.cueValidityDistribution = [-1 1 1]; 
 
 params.cue.color_pre        = round(255*hsv2rgb([0.33 1 0.66]));
 params.cue.neutralColor     = params.cue.color_pre;
@@ -77,10 +86,15 @@ params.dualTaskBothResps = true;
 %% markers for saccade endpoints
 params.marker.colors         = [params.cue.color_pre; params.cue.color_post];
 params.marker.posPolarAngles = params.strings.posPolarAngles;
-params.marker.distH          = params.strings.centerEcc; %absolute value of horizontal distance from screen center
-params.marker.distY          = [0.6 0.9]; %absolute value of start and end distances from horizontal midline [deg]
+params.marker.distH_spaces   = params.strings.centerEcc_spaces; %absolute value of horizontal distance from screen center
+params.marker.distY_deg      = [0.6 0.9]; %absolute value of start and end distances from horizontal midline [deg]
 params.marker.thick          = 3;
-params.marker.length         = abs(diff(params.marker.distY));
+params.marker.length_deg     = abs(diff(params.marker.distY_deg));
+
+%saccade target locations in degrees relative to screen center
+params.saccadeTargets.x_spaces   = params.strings.centerEcc_spaces*cosd(params.strings.posPolarAngles);
+params.saccadeTargets.y_spaces   = params.strings.centerEcc_spaces*sind(params.strings.posPolarAngles);
+
 
 %% Eyetracking 
 % initlFixCheckRad: 
@@ -98,11 +112,12 @@ params.initlFixCheckRad         = [1.5 2];
 params.fixCheckRad              = [1 1.5]; % radius of circle (or dims of rectangle) in which gaze position must remain to avoid fixation breaks. [deg]
 params.maxFixCheckTime          = 0.500; % maximum fixation check time before recalibration attempted 
 params.minFixTime               = 0.200; % minimum correct fixation time
-params.nMeanEyeSamples          = 10;    %number of eyelink samples over which to average gaze position to determine new fixation point 
+params.nMeanEyeSamples          = 10;    %number of eyelink samples over which to average gaze position to determine new fixation point, one every 10 ms 
 
-params.maxSaccadeTime           = 0.500; %[s] max time between pre-cue and eyes landing at target location before trial ends with a beep 
+params.landingCheckRad          = [1.5 2]; %dims of rectangle around saccade target in which gaze must land for good saccade 
+params.minSaccadeTime           = 0.050; %[s] min time between pre-cue and eyes landing at saccad target to allow as good saccade
+params.maxSaccadeTime           = 0.400; %[s] max time between pre-cue and eyes landing at target location before trial ends with a beep 
 params.minLandingTime           = 0.030; %[s] min time during which gaze has to be within maxLandingError degrees from saccade target 
-params.maxLandingError          = 2.5; %[deg] max distance between gaze position and saccade target location to count as success 
 
 %% Number of trials per block:
 params.trialsPerBlock           = 25;
@@ -118,9 +133,11 @@ trialSegs = {'fixation','preCue','stimuli','stimPostcueISI','postCue'};
 params.trialSegments = trialSegs;
 
 params.time.fixation            = 0.500;
-params.time.preCue              = 0.150; %[0.050 0.200]; %min max
+params.time.preCueMin           = 0.05;
+params.time.preCueMax           = 0.20; %pre-cue duration varies across trials between this min and max 
+params.time.preCue              = mean([params.time.preCueMin params.time.preCueMax]);
 params.time.stimuli             = 0.075;  
-params.time.stimPostcueISI      = 0.200; 
+params.time.stimPostcueISI      = 0.300; 
 params.time.postCue             = inf; %lasts until response
 
 params.time.demoStimDur         = 0.150;

@@ -1,4 +1,4 @@
-function task = makeStim_PWA(task, scr)
+function [task, scr] = makeStim_PWA(task, scr)
  
 % Prepares stimuli for the FOVB (lexical decision field of view) experiment
 % Calculates stimulus positions, prepares text and creates sounds 
@@ -18,6 +18,10 @@ task.stringImageParams = stringImageParams;
 if task.stringImageParams.pixelsPerDegree~=scr.ppd
     error('(%s) Pixels per degree for words (%.4f) does not equal ppd for this screen (%.4f)!', mfilename, task.stringImageParams.pixelsPerDegree, scr.ppd);
 end
+if task.stringImageParams.exptParams.strings.xHeightDeg~=task.strings.xHeightDeg
+    error('(%s) Premade word images are not of the correct x-heigh (%.2f instead of %.2f)!', mfilename, task.stringImageParams.exptParams.strings.xHeightDeg, task.strings.xHeightDeg);
+end
+
 
 %2. for masks
 imageParamFile = fullfile(task.imagePath,sprintf('maskImageParams_%s.mat', task.displayName));
@@ -31,17 +35,22 @@ if task.maskImageParams.pixelsPerDegree~=scr.ppd
     error('(%s) Pixels per degree for masks (%.4f) does not equal ppd for this screen (%.4f)!',mfilename, task.maskImageParams.pixelsPerDegree, scr.ppd);
 end
 
-%% stimulus center positions
-task.strings.centerX = round(scr.centerX+scr.ppd*task.strings.centerEcc.*cosd(task.strings.posPolarAngles));
-task.strings.centerY = round(scr.centerY-scr.ppd*task.strings.centerEcc.*sind(task.strings.posPolarAngles));
+task.strings.spacingDeg = stringImageParams.spacingDeg;
+task.strings.actualXHeightDeg = stringImageParams.spacingDeg;
 
+%% stimulus center positions - convert from spaces to deg
+task.strings.centerEcc_deg = task.strings.centerEcc_spaces*stringImageParams.spacingDeg;
+task.strings.centerX = round(scr.centerX+scr.ppd*task.strings.centerEcc_deg.*cosd(task.strings.posPolarAngles));
+task.strings.centerY = round(scr.centerY-scr.ppd*task.strings.centerEcc_deg.*sind(task.strings.posPolarAngles));
 
-%% Fixation point:
-scr.fixCkRad = round(task.fixCheckRad*scr.ppd);   % fixation check radius
-scr.intlFixCkRad = round(task.initlFixCheckRad*scr.ppd);   % fixation check radius, for trial start
+%% saccade target positions
+task.saccadeTargets.xDeg = task.saccadeTargets.x_spaces*stringImageParams.spacingDeg;
+task.saccadeTargets.yDeg = task.saccadeTargets.y_spaces*stringImageParams.spacingDeg;
 
-task.fixation.posX  = round(scr.centerX+scr.ppd*task.fixation.ecc.*cosd(task.fixation.posPolarAngles));
-task.fixation.posY  = round(scr.centerY-scr.ppd*task.fixation.ecc.*sind(task.fixation.posPolarAngles));
+task.saccadeTargets.xPx = round(scr.centerX+scr.ppd*task.saccadeTargets.xDeg);
+task.saccadeTargets.yPx = round(scr.centerY-scr.ppd*task.saccadeTargets.yDeg);
+
+%% Fixation mark coordinates
 
 %Fixation mark is a dot on top of a cross on top of a disc. The cross
 %dimming is the target in the localizer fixation task. 
@@ -69,6 +78,18 @@ task.fixation.crossXY = round(allxy);
 %3. Dot
 task.fixation.dotDiamPix = round(scr.ppd*task.fixation.dotDiameter);
 
+%% Fixation checking: convert to pixels
+task.fixation.posX  = round(scr.centerX+scr.ppd*task.fixation.ecc.*cosd(task.fixation.posPolarAngles));
+task.fixation.posY  = round(scr.centerY-scr.ppd*task.fixation.ecc.*sind(task.fixation.posPolarAngles));
+
+scr.fixCkRad     = round(task.fixCheckRad*scr.ppd);   % fixation check radius
+scr.intlFixCkRad = round(task.initlFixCheckRad*scr.ppd);   % fixation check radius, for trial start
+
+task.fixCheckRadPx = scr.fixCkRad;   % fixation check radius
+task.intlFixCheckRadPx = scr.intlFixCkRad;   % fixation check radius, for trial start
+
+task.landingCheckRadPx = round(scr.ppd*task.landingCheckRad);
+scr.landingCheckRadPx = task.landingCheckRadPx;
 %% Spatial cue coordinates
 task.cue.x1 = scr.ppd*task.cue.minEcc*cosd(task.cue.posPolarAngles);
 task.cue.y1 = -1*scr.ppd*task.cue.minEcc*sind(task.cue.posPolarAngles);
@@ -91,6 +112,7 @@ end
 task.cue.allcoords = round(task.cue.allcoords);
 
 %% saccade endpoint markers
+task.marker.distH_deg  = task.marker.distH_spaces*stringImageParams.spacingDeg; %absolute value of horizontal distance from screen center
 
 %make "allcoords" - a 2x8 matrix, with x-positions in row 1 and y-positions in row 2 
 %then columns are: 
@@ -106,13 +128,13 @@ endIs = [2 4; 6 8];
 for si=1:2 %left, right
     for ti=1:2 %top, bottom 
         %start x
-        task.marker.allcoords(1,startIs(si,ti)) = round(scr.ppd*task.marker.distH*cosd(task.marker.posPolarAngles(si)));
+        task.marker.allcoords(1,startIs(si,ti)) = round(scr.ppd*task.marker.distH_deg*cosd(task.marker.posPolarAngles(si)));
         %end x - same
-        task.marker.allcoords(1,endIs(si,ti)) = round(scr.ppd*task.marker.distH*cosd(task.marker.posPolarAngles(si)));
+        task.marker.allcoords(1,endIs(si,ti)) = round(scr.ppd*task.marker.distH_deg*cosd(task.marker.posPolarAngles(si)));
 
         %start y
-        task.marker.allcoords(2,startIs(si,ti)) = round(dY(ti)*scr.ppd*task.marker.distY(1));
-        task.marker.allcoords(2,endIs(si,ti)) = round(dY(ti)*scr.ppd*task.marker.distY(2));
+        task.marker.allcoords(2,startIs(si,ti)) = round(dY(ti)*scr.ppd*task.marker.distY_deg(1));
+        task.marker.allcoords(2,endIs(si,ti)) = round(dY(ti)*scr.ppd*task.marker.distY_deg(2));
 
     end
 end
@@ -121,9 +143,6 @@ task.marker.startIsBySides = startIs;
 task.marker.endIsBySides = startIs;
 task.marker.colsBySides = [1 2 3 4; 5 6 7 8];
 
-%% eyetracking 
-task.fixCkRad = round(task.fixCheckRad*scr.ppd);   % fixation check radius
-task.intlFixCkRad = round(task.initlFixCheckRad*scr.ppd);   % fixation check radius, for trial start
 
 
 %% Text

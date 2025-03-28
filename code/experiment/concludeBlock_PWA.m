@@ -1,4 +1,4 @@
-function userDone = concludeBlock_SCLRCS(task,scr,blockNum)
+function userDone = concludeBlock_PWA(task,scr,blockNum)
 
 WaitSecs(0.5);
 
@@ -15,7 +15,7 @@ c=task.textColor;
 textSep=1.25;
 
 %compute accuracy in this block 
-blockPC = nanmeanAW([task.trials.respCorrect1(:); task.trials.respCorrect2(:)]);
+blockPC = mean(task.trials.respCorrect,'omitnan');
 
 if blockNum < task.numBlocks
     doneText = sprintf('All done with block %i of %i!', blockNum, task.numBlocks); 

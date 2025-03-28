@@ -19,12 +19,19 @@ else
     blockText=sprintf('Block %i of %i', blockNum, task.numBlocks);
 end
 
+if task.cueBlocks(blockNum)==0
+    blockText = [blockText ': STEADY FIXATION TRIALS'];
+    instructText{1} = 'Keep your gaze fixed on the central cross throughout each trial.';
+    instructText{2} = 'The target word you have to categorize could be on either side.';
+else
+    blockText = [blockText ': EYE MOVEMENT TRIALS'];
+    instructText{1} = 'On each trial, move your eyes as fast as you can to the side indicated by the central green line.';
+    instructText{2} = 'The target word is most likely to be at that side, but will sometimes be on the other side (as indicated afterwards by the blue line).';
+end
 
-instructText{1} = 'Report whether you think the post-cued letter string was a living thing, with a rating from "sure no" to "sure yes."';
-instructText{2} = 'Use your left hand (keys 0, 1, 4, and 7) for the left position, and your right hand (keys ., 3, 6, and 9) for the right position.';
+instructText{3} = 'Then report whether you think the post-cued letter string was a living thing, with a rating from "sure no" to "sure yes."';
+instructText{4} = 'Use your left hand (keys 0, 1, 4, and 7) for the left position, and your right hand (keys ., 3, 6, and 9) for the right position.';
 
-instructText{3} = ' ';
-instructText{4} = 'Always fixate your gaze on the central cross.';
 
 continueText = 'Press any of your response keys to continue';
 continueButton = [task.buttons.resp KbName('space')];
@@ -48,7 +55,7 @@ end
 for sI = sIs
     Screen('TextStyle',sI,2); %italic
 
-    vertPos = 6.5;
+    vertPos = 3.5;
     ptbDrawFormattedText(sI,blockText, dva2scrPx(scr, 0, vertPos),c,true,true,false,false);
     
     

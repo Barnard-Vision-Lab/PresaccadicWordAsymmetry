@@ -26,29 +26,61 @@ for bi = 1:task.numBlocks
     ts.blockNum = ones(task.trialsPerBlock,1)*bi;
     ts.originalBlockTrialNum  = (1:task.trialsPerBlock)';
     
+    %cueCond: 0=neutral/fixation; 1=cued/saccade
+    ts.cueCond = ones(task.trialsPerBlock, 1)*task.cueBlocks(bi);
+
     blockInfo = [blockInfo; ts];
 end
 
-%% then counterbalance key variables 
-design.parameters.targSide              = 1:2;
-design.parameters.cueValidity           = [-1 0 0 1 1]; %-1=invalid; 0=neutral; 1=valid
-design.parameters.side1Category         = 1:2; %1=nonliving; 2 = living;
-design.parameters.side2Category         = 1:2; 
+%% then counterbalance key variables
 
 
-[trls, minCounterbalanceTs] = makeTrialOrder(design,task.numBlocks*task.trialsPerBlock);
+design.parameters.targetSide              = 1:2;
+design.parameters.targetCategory          = task.strings.realWordCatgs;
 
+% design.parameters.side1Category         = 1:2; %1=nonliving; 2 = living;
+% design.parameters.side2Category         = 1:2; 
+
+task.runTrials = table;
+for cueType = unique(blockInfo.cueCond)'
+    cueTs = blockInfo.cueCond==cueType;
+    theseBlocks = blockInfo(cueTs,:);
+    if cueType==0
+        design.parameters.cueValidity = 0;
+    elseif cueType==1
+        design.parameters.cueValidity  = task.cueValidityDistribution; %-1=invalid;  1=valid; later neutral cues are set to 0
+
+    end
+
+    [trls, minCounterbalanceTs] = makeTrialOrder(design, sum(cueTs));
+    
+    task.runTrials = [task.runTrials;  [theseBlocks trls]];
+end
+    
+%re-sort by block number
+task.runTrials = sortrows(task.runTrials, {'blockNum','originalBlockTrialNum'});
+    
 %create the runTrials table from blockInfo and this new table trls
-task.runTrials = [blockInfo trls];
+totalTrials = size(task.runTrials,1);
 
 %add cuedSide: 0 for neutral, 1 for left, 2 for right. Depends on
 %cueValidity. 
-task.runTrials.cuedSide = task.runTrials.targSide; %start with cue on same side as target word 
+task.runTrials.cuedSide = task.runTrials.targetSide; %start with cue on same side as target word 
 task.runTrials.cuedSide(task.runTrials.cueValidity==0) = 0; %neutral trials its 0
-task.runTrials.cuedSide(task.runTrials.cueValidity==-1) = 3-task.runTrials.targSide(task.runTrials.cueValidity==-1); %invalid trials its opposite of targSide (1 for 2 and 2 for 1).  
+task.runTrials.cuedSide(task.runTrials.cueValidity==-1) = 3-task.runTrials.targetSide(task.runTrials.cueValidity==-1); %invalid trials its opposite of targetSide (1 for 2 and 2 for 1).  
+
+%add category of each word
+task.runTrials.side1Category = ones(size(task.runTrials.targetSide))*task.strings.pseudowordCatg;
+task.runTrials.side1Category(task.runTrials.targetSide==1)  = task.runTrials.targetCategory(task.runTrials.targetSide==1);
+
+task.runTrials.side2Category = ones(size(task.runTrials.targetSide))*task.strings.pseudowordCatg;
+task.runTrials.side2Category(task.runTrials.targetSide==2)  = task.runTrials.targetCategory(task.runTrials.targetSide==2);
 
 
-totalTrials = size(task.runTrials,1);
+%add preCue duration
+task.runTrials.preCueDur = task.time.preCueMin + (task.time.preCueMax-task.time.preCueMin)*rand(totalTrials,1);
+task.runTrials.preCueDur = durtnMultipleOfRefresh(task.runTrials.preCueDur, task.fps, task.durationRoundTolerance); 
+
 
 %% add trial numbers
 %override the "trialNum" variable, which was set by makeTrialOrder
@@ -74,13 +106,13 @@ nWords = size(L,1);
 wordStats.nPlannedAppearances = zeros(nWords, 1);
 wordStats.nAppearances = zeros(nWords,1);
 wordStats.appearedWith = cell(nWords,1);
-wordsWithExtraRep = cell(1,2);
+wordsWithExtraRep = cell(1,3);
 %for each category, how many times the full set of words appears
-nFullRepeats = zeros(1,2);
+nFullRepeats = zeros(1,3);
 %and for each category, the number of words that need to appear 1
 %extra time
-nWordsExtraRep = zeros(1,2);
-for ci=1:2
+nWordsExtraRep = zeros(1,3);
+for ci=1:3
     catIs = find(L.categoryI==ci);
     nWordsPerCat = length(catIs);
     catCount = sum(task.runTrials.side1Category==ci) + sum(task.runTrials.side2Category==ci);
@@ -103,7 +135,7 @@ for ti=1:totalTrials
     wordCatgs = [task.runTrials.side1Category(ti) task.runTrials.side2Category(ti)];
     trialWords = NaN(1,2);
 
-    for side = 1:2 %top, bottom
+    for side = 1:2 %left, right 
         availableWords = find(wordStats.nAppearances<wordStats.nPlannedAppearances & L.categoryI==wordCatgs(side));
         if side==2
             %set word 2: a word that word 1 hasnt appeared with
@@ -112,11 +144,15 @@ for ti=1:totalTrials
         end
         if ~isempty(availableWords)
             wordi = randsample(availableWords, 1);
-        else  
+        else
+            try
             availableWords = find(L.categoryI==wordCatgs(side));
             availableWords = availableWords(wordStats.nPlannedAppearances(availableWords)==min(wordStats.nPlannedAppearances(availableWords)));
             availableWords = setdiff(availableWords, [trialWords(1) wordStats.appearedWith{trialWords(1)}]);
-            
+            catch
+                esca
+                keyboard
+            end
             wordi = randsample(availableWords, 1);
             fprintf(1,'\nTrial %i, word %i: Got stuck, had to use a word 1 more time than planned\n', ti, side);
             

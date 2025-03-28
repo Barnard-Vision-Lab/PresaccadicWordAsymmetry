@@ -63,7 +63,7 @@ task.buttons = setupKeys_PWA();
 task = prepSounds(task);
 
 %% make stimuli (colors, positions, find word images, etc)
-task = makeStim_PWA(task, scr);
+[task, scr] = makeStim_PWA(task, scr);
 
 %% Timing Parameters
 
@@ -192,13 +192,13 @@ runData.meanPCorrect  = mean(runData.pc(~isnan(runData.pc)));
 
 if ~task.practice
     %check stimulus timing
-    runData.timing = checkStimTiming(doneTrials, task);
+    runData.timing = checkStimTiming_PWA(doneTrials, task);
     
     %print
     try
         runData = summarizeRunPerformance(runData, doneTrials, task);
     catch me
-        sca
+        esca
         keyboard
     end
 end

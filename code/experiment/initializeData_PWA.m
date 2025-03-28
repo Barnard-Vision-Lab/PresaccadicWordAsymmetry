@@ -13,7 +13,8 @@ end
 %others from the Trial function 
 trialVars = {'tTrialStart','tITIOns','tITIOff','fixBreak','trialDone','nFixBreakSegs', 'didRecalib','quitDuringRecalib','tFeedback',...
               'tFixBreak','userQuit','trialDone','responseTimeout','stimMaskISI',...
-              'chosenRes1','chosenRes2','tRes1','tRes2','respCorrect1','respCorrect2','pressedWrongSide'};
+              'chosenRes1','chosenRes2','tRes','respCorrect','pressedWrongSide', ...
+              'tMovementStart','tLanded','tSaccTimeout','saccadeLanded','saccadeTimeout'};
           
 for tdi = 1:numel(trialVars)
     eval(sprintf('task.trials.%s = emptyMat;',trialVars{tdi}));

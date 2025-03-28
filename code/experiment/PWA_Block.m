@@ -86,9 +86,13 @@ doRunTrials = true;
 
 while doRunTrials
     ti = ti +1;
+    
+    %"td" is a little 1-row table with all the parameters for the current
+    %trial
     td = task.trials(ti,:);
     
-    
+    %set preCue duration
+    task.trialStruct.durations(task.preCueSegmentI) = td.preCueDur;
     
     trialGoalStart = GetSecs;
     
@@ -140,7 +144,16 @@ while doRunTrials
         %if fixbreak, and this is behavioral testing, add that trial back at the end
         if ~trialRes.trialDone && ~task.MRI && ti<=(nTrials-task.nTrialsLeftRepeatAbort)
             nTrials = nTrials + 1;
-            task.trials(nTrials, :) = td;
+            td.chosenRes = NaN;
+            try
+                task.trials(nTrials, :) = td;
+            catch
+                setdiff(td.Properties.VariableNames,task.trials.Properties.VariableNames)
+                setdiff(task.trials.Properties.VariableNames,td.Properties.VariableNames)
+
+                esca
+                keyboard
+            end
             task.trials.trialNum(nTrials) = nTrials;
             task.trials.overallTrialNum(nTrials) = max(task.trials.overallTrialNum)+1;
         end
@@ -155,9 +168,10 @@ while doRunTrials
 end
 
 blockRes.trialsDone = ti - 1*trialRes.userQuit;
-blockRes.pc = nanmeanAW([task.trials.respCorrect1(:); task.trials.respCorrect2(:)]);
-blockRes.pTimeout = nanmeanAW(task.trials.responseTimeout(:));
-blockRes.pFixBreak = nanmeanAW(task.trials.fixBreak(:));
+blockRes.pc = mean(task.trials.respCorrect(:),'omitnan');
+blockRes.pTimeout = mean(task.trials.responseTimeout(:),'omitnan');
+blockRes.pFixBreak = mean(task.trials.fixBreak(:),'omitnan');
+blockRes.pSaccTooSlow = mean(task.trials.saccadeTimeout,'omitnan');
 blockRes.userQuitPartway = trialRes.userQuit | quitDuringRecalib; %terminate either if pressed q at end of trial or during recalib.
 blockRes.terminateByStair = terminateByStair;
 

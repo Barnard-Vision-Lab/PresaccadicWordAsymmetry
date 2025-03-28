@@ -3,16 +3,13 @@
 clear all;
 
 %% to do 
-% - start with Trial function, so saccade detection and
-% timing
-% - set word position in units of letter spaces
-% - list of pseudowords
-% - make only 1 real word per trial and 1 pseudoword 
-% - make precue interval variable 
-% - adjust initializeData_PWA
-% - summarizeRunPerformance function 
+% - possibly present a dot at saccade target location after word disappears
+% (so you're not staring at nothing... maybe after an ISI) 
+% - finalize stimulus set 
+% - then remake stimuli 
+
 %% do eye-tracking? 0=no, 1=yes
-EYE = 0;
+EYE = 1;
 
 %% set which screen we're using
 if strcmp(getHostName(1),'vpixx-linux-machine')
@@ -24,7 +21,7 @@ end
 %% get subject ID
 aquestion = 'Enter the subject''s ID\n';
 % % KLUGE!!! 
-SID='xx'
+SID='aw'
 while isempty(SID)
     SID = input(aquestion, 's');
 end
@@ -72,7 +69,13 @@ while doPractice
     nPracBlocks = nPracBlocks+1;
     params.blockNum = nPracBlocks;
 
-       
+    %% saccade or fixation block? 
+     cueType = 99;
+     while  ~all(isfloat(cueType)) || (cueType<0 || cueType>1)
+        cueType = input('\nEnter the cueing condition for this practice block: \n   0=fixation/neutral\n   1=saccade/cued\n');
+    end
+    params.cueBlocks = cueType;
+    
     %%
     try
         [pracTask, ~, pracRes] = PWA_Run(params);
@@ -106,13 +109,24 @@ params.practice = false;
 
 
 %% set number of blocks, and cue conditions, for main experiment 
-
+cueBlockSet = params.blockCueDistribution;
+denom = length(cueBlockSet);
 numBlocks = -1;
-denom = 1;
 while  ~all(isfloat(numBlocks)) || (numBlocks<0 || numBlocks>50) || mod(numBlocks, denom)~=0
     numBlocks = input(sprintf('\nEnter number of blocks you would like to do. Must be a multiple of %i (or 0 to quit).\n', denom));
 end
 
+%set block order
+nbs  = length(cueBlockSet);
+numSets = ceil(numBlocks/denom);
+cueBlocks = [];
+for seti=1:numSets
+    cueBlocks = [cueBlocks sampleWithoutReplacement(cueBlockSet,nbs)];
+end
+
+cueBlocks = cueBlocks(1:numBlocks);
+
+params.cueBlocks = cueBlocks;
 params.numBlocks = numBlocks;
 
 params.practice = false;
