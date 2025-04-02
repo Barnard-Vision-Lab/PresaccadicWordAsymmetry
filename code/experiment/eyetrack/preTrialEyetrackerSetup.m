@@ -57,7 +57,7 @@ if task.EYE>0
                         
                         %then draw fixation and wait a bit
                         fixPos = 1;
-                        drawFixation_SCLRCS(task, scr, fixPos);
+                        drawFixation_PWA(task, scr, fixPos);
                         Screen(scr.main,'DrawingFinished'); Screen('Flip', scr.main);
                         
                         WaitSecs(1);

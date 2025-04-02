@@ -35,7 +35,7 @@ else
     quitText = ' ';
     accText = ' ';
 end
-continueButton = [task.buttons.resp KbName('space')];
+continueButton = [task.buttons.resp KbName('space') KbName('Return')];
 quitButton = task.buttons.quit;
 %%%%%
 %% Now  draw  the text

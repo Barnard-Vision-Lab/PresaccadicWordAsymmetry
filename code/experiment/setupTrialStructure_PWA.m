@@ -6,6 +6,8 @@ nSegments           = numel(segmentNames);
 doMovie             = false(1,nSegments); %in case some segments are 'movies' that need updating every frame
 
 task.stimSegmentI = find(strcmp(segmentNames,'stimuli'));
+task.stimOffsetSegmentI = task.stimSegmentI+1;
+task.stimOffsetSegment = segmentNames{task.stimOffsetSegmentI};
 task.responseSegmentI = find(strcmp(segmentNames, 'postCue'));
 task.preCueSegmentI = find(strcmp(segmentNames, 'preCue'));
 

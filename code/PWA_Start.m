@@ -3,8 +3,7 @@
 clear all;
 
 %% to do 
-% - possibly present a dot at saccade target location after word disappears
-% (so you're not staring at nothing... maybe after an ISI) 
+% - have both words be same length? Or both masks always 6 letters? 
 % - finalize stimulus set 
 % - then remake stimuli 
 

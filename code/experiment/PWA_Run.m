@@ -149,6 +149,10 @@ while doRunBlocks
 end
 task.tRunEnd = GetSecs;
 
+%add stimulus offset
+eval(sprintf('task.trials.tStimOffset = task.trials.t%sOns;', task.stimOffsetSegment));
+eval(sprintf('doneTrials.tStimOffset = doneTrials.t%sOns;', task.stimOffsetSegment));
+
 %Close textures (all at once)
 alltex = [task.stringTextures(:); task.maskTextures(:)];
 Screen('Close',alltex(~isnan(alltex)));

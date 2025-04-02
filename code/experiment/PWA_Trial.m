@@ -212,18 +212,32 @@ while doStimLoop
                 
                 %central cue
                 drawCues_PWA(task, scr, td.cuedSide, true);
-                
-            case 'stimPostcueISI'
+            
+            case 'stimDotsISI'
                 %marker
                 drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
-                
-                %central cue
-                %drawCues_PWA(task, scr, td.cuedSide, true);
-                
+            
+            case 'dotsPostcueISI'
+               %marker
+                drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
+            
+                %dots
+                drawSaccTargDots_PWA(task, scr, 1:2, preCueMarkerColrs)
+
+
+%             case 'stimPostcueISI'
+%                 %marker
+%                 drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
+%                 
+%                  
             case 'postCue'
                 %marker
                 drawMarkers_PWA(task, scr, postCueMarkerSides, postCueMarkerColrs);
                 
+                %dots
+                drawSaccTargDots_PWA(task, scr, 1:2, postCueMarkerColrs)
+
+                %cues
                 drawCues_PWA(task, scr, td.targetSide, false);
                 
         end

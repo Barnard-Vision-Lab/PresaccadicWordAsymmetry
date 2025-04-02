@@ -125,6 +125,8 @@ dY = [1 -1]; %change in y for top, bottom
 startIs = [1 3; 5 7]; %rows = left/right; cols = top/bottom 
 endIs = [2 4; 6 8]; 
 
+task.marker.dotCoords = NaN(2,2);
+
 for si=1:2 %left, right
     for ti=1:2 %top, bottom 
         %start x
@@ -137,7 +139,13 @@ for si=1:2 %left, right
         task.marker.allcoords(2,endIs(si,ti)) = round(dY(ti)*scr.ppd*task.marker.distY_deg(2));
 
     end
+    task.marker.dotCoords(1,si) = round(scr.centerX+scr.ppd*task.marker.distH_deg*cosd(task.marker.posPolarAngles(si)));
+    task.marker.dotCoords(2,si) = round(scr.centerY-scr.ppd*task.marker.distH_deg*sind(task.marker.posPolarAngles(si)));
+    
+    
 end
+
+task.marker.dotDiam_px = round(scr.ppd*task.marker.dotDiam);
 
 task.marker.startIsBySides = startIs;
 task.marker.endIsBySides = startIs;

@@ -34,7 +34,7 @@ instructText{4} = 'Use your left hand (keys 0, 1, 4, and 7) for the left positio
 
 
 continueText = 'Press any of your response keys to continue';
-continueButton = [task.buttons.resp KbName('space')];
+continueButton = [task.buttons.resp KbName('space') KbName('Return')];
 finalText = continueText;
 startScanButton = task.buttons.resp;
 

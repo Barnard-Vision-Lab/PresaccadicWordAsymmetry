@@ -76,7 +76,7 @@ params.cue.neutralColor     = params.cue.color_pre;
 params.cue.color_post       = round(255*hsv2rgb([0.65 1 0.66]));
 params.cue.posPolarAngles   = params.strings.posPolarAngles;
 params.cue.thick            = 4;
-params.cue.length           = 0.16;
+params.cue.length           = 0.18;
 params.cue.minEcc           = 0.05; 
 params.cue.maxEcc           = params.cue.minEcc+params.cue.length; 
 
@@ -90,6 +90,7 @@ params.marker.distH_spaces   = params.strings.centerEcc_spaces; %absolute value 
 params.marker.distY_deg      = [0.6 0.9]; %absolute value of start and end distances from horizontal midline [deg]
 params.marker.thick          = 3;
 params.marker.length_deg     = abs(diff(params.marker.distY_deg));
+params.marker.dotDiam        = 0.1; %little dot at saccade target 
 
 %saccade target locations in degrees relative to screen center
 params.saccadeTargets.x_spaces   = params.strings.centerEcc_spaces*cosd(params.strings.posPolarAngles);
@@ -127,7 +128,7 @@ params.nTrialsLeftRepeatAbort   = 3;
 %% Timing parameters
 params.time.startRecordingTime  = 0.100; % time to wait after initializing eyelink recording before continuing 
 
-trialSegs = {'fixation','preCue','stimuli','stimPostcueISI','postCue'};
+trialSegs = {'fixation','preCue','stimuli','stimDotsISI','dotsPostcueISI','postCue'}; %stimPostcueISI
 %NOTE: ITI is not in this list of trialSegs because it is actually done
 %separately, after the feedback beeps, outside of the main trial loop. 
 params.trialSegments = trialSegs;
@@ -136,8 +137,9 @@ params.time.fixation            = 0.500;
 params.time.preCueMin           = 0.05;
 params.time.preCueMax           = 0.20; %pre-cue duration varies across trials between this min and max 
 params.time.preCue              = mean([params.time.preCueMin params.time.preCueMax]);
-params.time.stimuli             = 0.075;  
-params.time.stimPostcueISI      = 0.300; 
+params.time.stimuli             = 0.075;
+params.time.stimDotsISI         = 0.150; %time between stimulus offset and appearance of dots 
+params.time.dotsPostcueISI      = 0.150; 
 params.time.postCue             = inf; %lasts until response
 
 params.time.demoStimDur         = 0.150;
