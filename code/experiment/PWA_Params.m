@@ -90,7 +90,7 @@ params.marker.distH_spaces   = params.strings.centerEcc_spaces; %absolute value 
 params.marker.distY_deg      = [0.6 0.9]; %absolute value of start and end distances from horizontal midline [deg]
 params.marker.thick          = 3;
 params.marker.length_deg     = abs(diff(params.marker.distY_deg));
-params.marker.dotDiam        = 0.1; %little dot at saccade target 
+params.marker.dotDiam        = 0.2; %little dot at saccade target 
 
 %saccade target locations in degrees relative to screen center
 params.saccadeTargets.x_spaces   = params.strings.centerEcc_spaces*cosd(params.strings.posPolarAngles);
@@ -122,7 +122,7 @@ params.minLandingTime           = 0.030; %[s] min time during which gaze has to 
 
 %% Number of trials per block:
 params.trialsPerBlock           = 25;
-params.practiceTrialsPerBlock   = 12;
+params.practiceTrialsPerBlock   = 15;
 params.nTrialsLeftRepeatAbort   = 3; 
 
 %% Timing parameters
@@ -133,9 +133,9 @@ trialSegs = {'fixation','preCue','stimuli','stimDotsISI','dotsPostcueISI','postC
 %separately, after the feedback beeps, outside of the main trial loop. 
 params.trialSegments = trialSegs;
 
-params.time.fixation            = 0.500;
+params.time.fixation            = 0.850;
 params.time.preCueMin           = 0.05;
-params.time.preCueMax           = 0.20; %pre-cue duration varies across trials between this min and max 
+params.time.preCueMax           = 0.250; %pre-cue duration varies across trials between this min and max 
 params.time.preCue              = mean([params.time.preCueMin params.time.preCueMax]);
 params.time.stimuli             = 0.075;
 params.time.stimDotsISI         = 0.150; %time between stimulus offset and appearance of dots 
@@ -146,7 +146,7 @@ params.time.demoStimDur         = 0.150;
 
 
 %add the ITI separately, outside of the main trial loop
-params.time.ITI                 = 0.5; % total intertrial duration  
+params.time.ITI                 = 1; % total intertrial duration  
 
 params.time.delayBeforeFeedback = 0.35; %time between last response and first feedback beep 
 

@@ -55,9 +55,11 @@ end
 cuedTrls = trials.cueValidity~=0;
 runData.pFixBreak = mean(trials.fixBreak,'omitnan');
 runData.pSaccTooSlow = mean(trials.saccadeTimeout(cuedTrls),'omitnan');
-runData.pWordsGoneBeforeSaccLand = mean(trials.tLanded(cuedTrls)>trials.tStimOffset(cuedTrls),'omitnan');
-runData.pWordsFixated = mean(trials.tLanded(cuedTrls)<=trials.tStimOffset(cuedTrls),'omitnan');
 runData.meanSaccLat = mean(trials.tMovementStart(cuedTrls) - trials.tpreCueOns(cuedTrls),'omitnan');
+
+saccTrls = cuedTrls & ~trials.fixBreak & ~trials.saccadeTimeout;
+runData.pWordsGoneBeforeSaccLand = mean(trials.tLanded(saccTrls)>trials.tStimOffset(saccTrls),'omitnan');
+runData.pWordsFixated = mean(trials.tLanded(saccTrls)<=trials.tStimOffset(saccTrls),'omitnan');
 
 %% print out results
 theTime = clock;
@@ -75,8 +77,8 @@ for f = [1 tf]
     fprintf(f,'Fixation break on %.1f%% of trials\n', 100*runData.pFixBreak);
     fprintf(f,'Mean saccade latency: %.1f ms\n', 1000*runData.meanSaccLat);
     fprintf(f,'Saccade too slow on %.1f%% of trials\n', 100*runData.pSaccTooSlow);
-    fprintf(f,'Words disappared before saccade landing on %.1f%% of trials\n', 100*runData.pWordsGoneBeforeSaccLand);
-    fprintf(f,'Words got fixated after saccade on %.1f%% of trials\n', 100*runData.pWordsFixated);
+    fprintf(f,'Words disappared before saccade landing on %.1f%% of good-sacade trials\n', 100*runData.pWordsGoneBeforeSaccLand);
+    fprintf(f,'Words got fixated after saccade on %.1f%% of good-saccade trials\n', 100*runData.pWordsFixated);
             
 end
 

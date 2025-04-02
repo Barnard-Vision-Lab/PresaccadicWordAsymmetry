@@ -3,6 +3,9 @@
 clear all;
 
 %% to do 
+% - decide when and if to present dots;
+% - decide when and if to present pre-masks
+% - maybe make a different post-cue for invalid trials? 
 % - have both words be same length? Or both masks always 6 letters? 
 % - finalize stimulus set 
 % - then remake stimuli 
@@ -19,8 +22,7 @@ end
 
 %% get subject ID
 aquestion = 'Enter the subject''s ID\n';
-% % KLUGE!!! 
-SID='aw'
+SID='';
 while isempty(SID)
     SID = input(aquestion, 's');
 end

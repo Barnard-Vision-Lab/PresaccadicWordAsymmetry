@@ -134,6 +134,8 @@ lnd    = false;
 lndStartT = NaN;
 badEye = false;
 
+dotsAppeared = false;
+
 tooSlowSaccade = false;
 
 while doStimLoop
@@ -182,19 +184,21 @@ while doStimLoop
         
         switch segmentName
             case 'fixation'
-                %fixation mark and pre-masks
+% %                 %fixation mark and pre-masks
                 for si = 1:2
                     Screen('DrawTexture', scr.main, task.maskTextures(td.blockNum, td.originalBlockTrialNum, si), [], squeeze(task.maskRects(td.blockNum, td.originalBlockTrialNum, si, :)));
                 end
-                
+                drawSaccTargDots_PWA(task, scr, 1:2, preCueMarkerColrs)
+
                 %and markers
                 drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
             case 'preCue'
-                %pre-masks
+%                 %pre-masks
                 for si = 1:2
                     Screen('DrawTexture', scr.main, task.maskTextures(td.blockNum, td.originalBlockTrialNum, si), [], squeeze(task.maskRects(td.blockNum, td.originalBlockTrialNum, si, :)));
                 end
-                
+                drawSaccTargDots_PWA(task, scr, 1:2, preCueMarkerColrs)
+
                 %marker
                 drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
                 
@@ -222,8 +226,7 @@ while doStimLoop
                 drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
             
                 %dots
-                drawSaccTargDots_PWA(task, scr, 1:2, preCueMarkerColrs)
-
+                   % drawSaccTargDots_PWA(task, scr, 1:2, preCueMarkerColrs)
 
 %             case 'stimPostcueISI'
 %                 %marker
@@ -235,7 +238,7 @@ while doStimLoop
                 drawMarkers_PWA(task, scr, postCueMarkerSides, postCueMarkerColrs);
                 
                 %dots
-                drawSaccTargDots_PWA(task, scr, 1:2, postCueMarkerColrs)
+                %drawSaccTargDots_PWA(task, scr, 1:2, postCueMarkerColrs)
 
                 %cues
                 drawCues_PWA(task, scr, td.targetSide, false);
@@ -333,6 +336,9 @@ while doStimLoop
                 lndDur = GetSecs - lndStartT;
                 if lndDur>task.minLandingTime
                     landed = true;
+                    if ~dotsAppeared
+                        
+                    end
                 end
                 %else then landing hasnt started
             elseif ~lnd
