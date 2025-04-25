@@ -34,12 +34,12 @@ end
 
 %% then counterbalance key variables
 
-
+ cLengs = task.strings.lexicon.length;
+ lens = unique(cLengs)';
+  
 design.parameters.targetSide              = 1:2;
 design.parameters.targetCategory          = task.strings.realWordCatgs;
-
-% design.parameters.side1Category         = 1:2; %1=nonliving; 2 = living;
-% design.parameters.side2Category         = 1:2; 
+design.parameters.stringLength            = lens;
 
 task.runTrials = table;
 for cueType = unique(blockInfo.cueCond)'
@@ -136,19 +136,29 @@ for ti=1:totalTrials
     trialWords = NaN(1,2);
 
     for side = 1:2 %left, right 
-        availableWords = find(wordStats.nAppearances<wordStats.nPlannedAppearances & L.categoryI==wordCatgs(side));
+        %availablewords are those of the chosen category and chosen length
+        %for this trial. Both words should be the same length. 
+        availableWords = find(wordStats.nAppearances<wordStats.nPlannedAppearances & L.categoryI==wordCatgs(side) & L.length==task.runTrials.stringLength(ti));
         if side==2
             %set word 2: a word that word 1 hasnt appeared with
             %and hasn't been fully used yet. Also can't be word 1.
             availableWords = setdiff(availableWords, [trialWords(1) wordStats.appearedWith{trialWords(1)}]);
         end
+        
         if ~isempty(availableWords)
-            wordi = randsample(availableWords, 1);
+            if length(availableWords)>1
+                wordi = randsample(availableWords, 1);
+            else %if theres only 1 available word, just use it 
+                wordi = availableWords;
+            end
+                
         else
             try
-            availableWords = find(L.categoryI==wordCatgs(side));
+            availableWords = find(L.categoryI==wordCatgs(side) & L.length==task.runTrials.stringLength(ti));
             availableWords = availableWords(wordStats.nPlannedAppearances(availableWords)==min(wordStats.nPlannedAppearances(availableWords)));
-            availableWords = setdiff(availableWords, [trialWords(1) wordStats.appearedWith{trialWords(1)}]);
+            if side==2
+                availableWords = setdiff(availableWords, [trialWords(1) wordStats.appearedWith{trialWords(1)}]);
+            end
             catch
                 esca
                 keyboard
@@ -174,6 +184,13 @@ for ti=1:totalTrials
     %trials
     wordStats.appearedWith{trialWords(1)} = [wordStats.appearedWith{trialWords(1)} trialWords(2)];
     wordStats.appearedWith{trialWords(2)} = [wordStats.appearedWith{trialWords(2)} trialWords(1)];
+    
+    %catch errors
+    if task.runTrials.side1StringLength(ti)~=task.runTrials.side2StringLength(ti)
+        esca
+        keyboard
+    end
+        
 end
 
 wordStats.nFullCategorySetRepeats = nFullRepeats;
@@ -183,8 +200,7 @@ task.wordStats = wordStats;
 
 %% pick pre-masks for each trial (from same set of strings, but shown in BACS-2 font)
  %restrict masks to be strings of a certain length
- cLengs = task.strings.lexicon.length;
-  lens = unique(cLengs)';
+
 
 for len = lens
     availableIs = find(cLengs==len);
