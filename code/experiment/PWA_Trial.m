@@ -226,7 +226,7 @@ while doStimLoop
                 drawMarkers_PWA(task, scr, preCueMarkerSides, preCueMarkerColrs);
             
                 %dots
-                   % drawSaccTargDots_PWA(task, scr, 1:2, preCueMarkerColrs)
+                   drawSaccTargDots_PWA(task, scr, 1:2, preCueMarkerColrs)
 
 %             case 'stimPostcueISI'
 %                 %marker
@@ -238,11 +238,14 @@ while doStimLoop
                 drawMarkers_PWA(task, scr, postCueMarkerSides, postCueMarkerColrs);
                 
                 %dots
-                %drawSaccTargDots_PWA(task, scr, 1:2, postCueMarkerColrs)
+                drawSaccTargDots_PWA(task, scr, 1:2, postCueMarkerColrs)
 
                 %cues
                 drawCues_PWA(task, scr, td.targetSide, false);
                 
+                % draw postcue rectangle around target position 
+                Screen('FrameRect', scr.main, task.marker.colors(2,:), squeeze(task.postCueRect(td.blockNum, td.originalBlockTrialNum, :)));
+               
         end
         
         

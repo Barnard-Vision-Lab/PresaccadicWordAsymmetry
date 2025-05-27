@@ -3,10 +3,14 @@
 clear all;
 
 %% to do 
-% - decide when and if to present dots;
 % - decide when and if to present pre-masks
 % - maybe make a different post-cue for invalid trials? 
-% - have both words be same length? Or both masks always 6 letters? 
+   % % draw a rectangle around the location of the target word. Use the
+   % Screen(FrameRect) function. need to give it a rect which is 
+   %[left top right bottom] pixel coordinates relative to upper left corner (0,0)
+   %pick for each trial one of 2 "rects" one for the left, one for the
+   %right, depend on "targSide" for this trial 
+   %In the Trial function, td.targSide is 1 (left) or 2(right) 
 % - finalize stimulus set 
 % - then remake stimuli 
 

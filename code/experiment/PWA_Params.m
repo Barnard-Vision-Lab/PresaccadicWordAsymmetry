@@ -28,8 +28,9 @@ params.strings.color               = ones(1,3)*round(params.strings.lum*255);
 
 %STIMULUS SET
 params.strings.lengths            = [5 6];
-%Load stimulus set from csv file. 
-params.strings.listFile = fullfile(params.paths.stimuli,'PWA_StimSet.csv');
+%Load stimulus set from csv file.
+params.strings.listFile = fullfile(params.paths.stimuli,'PWA_ArtvsNat_StimSet_Final.csv');
+
 params.strings.lexicon = readtable(params.strings.listFile);
 
 %filter by lengths
@@ -40,7 +41,7 @@ params.strings.categories        = flipud(unique(params.strings.lexicon.category
 params.strings.nCatg             = numel(params.strings.categories); 
 params.strings.nLeng             = length(params.strings.lexicon.length);
 
-[~,params.strings.realWordCatgs] = ismember({'NonLiving','Living'},  params.strings.categories);
+[~,params.strings.realWordCatgs] = ismember({'Artificial','Natural'},  params.strings.categories); %{'NonLiving','Living'}
 params.strings.pseudowordCatg = find(strcmp(params.strings.categories, 'Pseudoword'));
 
 params.strings.maskFontName =   'BACS2serif';
@@ -79,6 +80,9 @@ params.cue.thick            = 4;
 params.cue.length           = 0.18;
 params.cue.minEcc           = 0.05; 
 params.cue.maxEcc           = params.cue.minEcc+params.cue.length; 
+%by how much to expand the post-cue rect around the bounding box of the
+%target word
+params.cue.postCueRectExpansionDeg = 0.1; 
 
 %Whether to get sequential responses to both sides in dual-task
 params.dualTaskBothResps = true;
@@ -87,7 +91,7 @@ params.dualTaskBothResps = true;
 params.marker.colors         = [params.cue.color_pre; params.cue.color_post];
 params.marker.posPolarAngles = params.strings.posPolarAngles;
 params.marker.distH_spaces   = params.strings.centerEcc_spaces; %absolute value of horizontal distance from screen center
-params.marker.distY_deg      = [0.6 0.9]; %absolute value of start and end distances from horizontal midline [deg]
+params.marker.distY_deg      = [0.75 1.15]; %absolute value of start and end distances from horizontal midline [deg]
 params.marker.thick          = 3;
 params.marker.length_deg     = abs(diff(params.marker.distY_deg));
 params.marker.dotDiam        = 0.2; %little dot at saccade target 
@@ -117,12 +121,12 @@ params.nMeanEyeSamples          = 10;    %number of eyelink samples over which t
 
 params.landingCheckRad          = [1.5 2]; %dims of rectangle around saccade target in which gaze must land for good saccade 
 params.minSaccadeTime           = 0.050; %[s] min time between pre-cue and eyes landing at saccad target to allow as good saccade
-params.maxSaccadeTime           = 0.400; %[s] max time between pre-cue and eyes landing at target location before trial ends with a beep 
+params.maxSaccadeTime           = 0.500; %[s] max time between pre-cue and eyes landing at target location before trial ends with a beep 
 params.minLandingTime           = 0.030; %[s] min time during which gaze has to be within maxLandingError degrees from saccade target 
 
 %% Number of trials per block:
-params.trialsPerBlock           = 25;
-params.practiceTrialsPerBlock   = 15;
+params.trialsPerBlock           = 32;
+params.practiceTrialsPerBlock   = 16;
 params.nTrialsLeftRepeatAbort   = 3; 
 
 %% Timing parameters
@@ -134,8 +138,8 @@ trialSegs = {'fixation','preCue','stimuli','stimDotsISI','dotsPostcueISI','postC
 params.trialSegments = trialSegs;
 
 params.time.fixation            = 0.850;
-params.time.preCueMin           = 0.05;
-params.time.preCueMax           = 0.250; %pre-cue duration varies across trials between this min and max 
+params.time.preCueMin           = 0.100;%0.05;
+params.time.preCueMax           = 0.350; %0.250; %pre-cue duration varies across trials between this min and max 
 params.time.preCue              = mean([params.time.preCueMin params.time.preCueMax]);
 params.time.stimuli             = 0.075;
 params.time.stimDotsISI         = 0.150; %time between stimulus offset and appearance of dots 

@@ -52,10 +52,13 @@ end
 %% gaze behavior
 
 
-cuedTrls = trials.cueValidity~=0;
+cuedTrls = trials.cueValidity~=0 & goodTrials;
 runData.pFixBreak = mean(trials.fixBreak,'omitnan');
 runData.pSaccTooSlow = mean(trials.saccadeTimeout(cuedTrls),'omitnan');
 runData.meanSaccLat = mean(trials.tMovementStart(cuedTrls) - trials.tpreCueOns(cuedTrls),'omitnan');
+
+trials.fixBreak(isnan(trials.fixBreak)) = 0;
+trials.saccadeTimeout(isnan(trials.saccadeTimeout)) = 0;
 
 saccTrls = cuedTrls & ~trials.fixBreak & ~trials.saccadeTimeout;
 runData.pWordsGoneBeforeSaccLand = mean(trials.tLanded(saccTrls)>trials.tStimOffset(saccTrls),'omitnan');

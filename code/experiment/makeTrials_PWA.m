@@ -177,7 +177,7 @@ for ti=1:totalTrials
         eval(sprintf('task.runTrials.side%iString(ti) = L.word(wordi);', side));
 
         eval(sprintf('task.runTrials.side%iStringLength(ti) = L.length(wordi);', side))
-        eval(sprintf('task.runTrials.side%iStringFreq(ti) = L.freq(wordi);', side))
+        eval(sprintf('task.runTrials.side%iStringFreq(ti) = L.Freq_SUBTLEXUS_Zipf(wordi);', side))
     end
     %for both words selected for this trial, save to "appearedWith" the
     %other word, to avoid repetitions of this same pair in subsequent

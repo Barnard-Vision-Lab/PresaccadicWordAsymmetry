@@ -11,6 +11,7 @@ task.stringRects    = NaN(task.numBlocks,task.trialsPerBlock, nSides, 4);
 task.maskTextures   = NaN(task.numBlocks,task.trialsPerBlock, nSides);
 task.maskRects      = NaN(task.numBlocks,task.trialsPerBlock, nSides, 4);
 
+rectExpansionPx = round(task.cue.postCueRectExpansionDeg*scr.ppd);
 %loops through all trials and then loops through side (left/right) and
 %pulls out the image that we have decided will be presented in that side on
 %that trial and loads in that image
@@ -43,6 +44,12 @@ for ti = 1:ntrials %trial number within run (including all blocks)
         endY = startY + hei -1;
         
         task.stringRects(td.blockNum, td.trialNum, side, :) = round([startX startY endX endY]);
+        
+        %save rect for post-cue around target position, dilated by a little
+        %bit
+        if side==td.targetSide
+            task.postCueRect(td.blockNum, td.trialNum, :) = round([startX startY endX endY]) + [-1 -1 1 1]*rectExpansionPx;
+        end
           
         %% mask
         eval(sprintf('indx = td.side%iMaskIndex;', side));
