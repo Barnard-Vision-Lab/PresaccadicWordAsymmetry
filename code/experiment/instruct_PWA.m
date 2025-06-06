@@ -29,8 +29,8 @@ else
     instructText{2} = 'The target word is most likely to be at that side, but will sometimes be on the other side (as indicated afterwards by the blue line).';
 end
 
-instructText{3} = 'Then report whether you think the post-cued letter string was a living thing, with a rating from "sure no" to "sure yes."';
-instructText{4} = 'Use your left hand (keys 0, 1, 4, and 7) for the left position, and your right hand (keys ., 3, 6, and 9) for the right position.';
+instructText{3} = 'Then report whether you think the post-cued word referred to an artificial thing or a natural thing."';
+instructText{4} = 'Use your left hand when asked about the left side (0 for artificial, 7 for natural), and your right hand when asked about the right side ("." for artificial, 9 for natural).';
 
 
 continueText = 'Press any of your response keys to continue';

@@ -37,7 +37,10 @@ params.strings.lexicon = readtable(params.strings.listFile);
 params.strings.lexicon = params.strings.lexicon(ismember(params.strings.lexicon.length, params.strings.lengths), :);
 
 params.strings.lexicon.stringNum = (1:size(params.strings.lexicon, 1))';
-params.strings.categories        = flipud(unique(params.strings.lexicon.category)); 
+params.strings.categories        = unique(params.strings.lexicon.category);
+%change order of these 
+params.strings.categories        = params.strings.categories([3 1 2]);
+
 params.strings.nCatg             = numel(params.strings.categories); 
 params.strings.nLeng             = length(params.strings.lexicon.length);
 
@@ -138,8 +141,8 @@ trialSegs = {'fixation','preCue','stimuli','stimDotsISI','dotsPostcueISI','postC
 params.trialSegments = trialSegs;
 
 params.time.fixation            = 0.850;
-params.time.preCueMin           = 0.100;%0.05;
-params.time.preCueMax           = 0.350; %0.250; %pre-cue duration varies across trials between this min and max 
+params.time.preCueMin           = 0.150;%pre-cue min and max relative to dl's saccade latencies
+params.time.preCueMax           = 0.280; %0.250; %pre-cue duration varies across trials between this min and max 
 params.time.preCue              = mean([params.time.preCueMin params.time.preCueMax]);
 params.time.stimuli             = 0.075;
 params.time.stimDotsISI         = 0.150; %time between stimulus offset and appearance of dots 

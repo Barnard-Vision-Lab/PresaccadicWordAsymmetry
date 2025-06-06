@@ -32,20 +32,20 @@ for cueI = 1:nConds
     theseTs = trials.cueValidity==cueCond & goodTrials;
     targSides = trials.targetSide(theseTs);
     
-    resp = task.buttons.reportedCategory(trials.chosenRes(theseTs));
+    resp = task.buttons.reportedCategory(trials.chosenRes(theseTs))';
     pres = trials.targetCategory(theseTs);
     
     runData.ntsByCond(cueI) = length(resp);
     
     if ~isempty(resp)
-        %and subtract 1 so that these are 0s and 1s
-        pres = pres-1;
-        resp = resp-1;
+        %and subtract 2 so that these are 0s and 1s
+        pres = pres-2;
+        resp = resp-2;
         
         respCorrect = resp==pres;
         runData.pcByCond(cueI) = mean(respCorrect(:));
         runData.dprmByCond(cueI) = computeDC(pres(:), resp(:));
-     
+             
     end
 end
 
