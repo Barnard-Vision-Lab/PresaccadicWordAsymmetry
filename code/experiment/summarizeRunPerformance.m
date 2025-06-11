@@ -55,10 +55,18 @@ end
 cuedTrls = trials.cueValidity~=0 & goodTrials;
 runData.pFixBreak = mean(trials.fixBreak,'omitnan');
 runData.pSaccTooSlow = mean(trials.saccadeTimeout(cuedTrls),'omitnan');
-runData.meanSaccLat = mean(trials.tMovementStart(cuedTrls) - trials.tpreCueOns(cuedTrls),'omitnan');
+trials.saccadeLatency  = NaN(size(trials.fixBreak));
+trials.saccadeLatency(cuedTrls) = trials.tMovementStart(cuedTrls) - trials.tpreCueOns(cuedTrls);
+runData.meanSaccLat = mean(trials.saccadeLatency(cuedTrls),'omitnan');
+runData.medianSaccLat = median(trials.saccadeLatency(cuedTrls),'omitnan');
 
 trials.fixBreak(isnan(trials.fixBreak)) = 0;
 trials.saccadeTimeout(isnan(trials.saccadeTimeout)) = 0;
+
+runData.saccPrcts = prctile(trials.saccadeLatency(cuedTrls), task.idealPreCueDurSaccLatPrctls);
+runData.newPreCueMin = runData.saccPrcts(1) - task.time.stimuli;
+runData.newPreCueMax = runData.saccPrcts(2) - task.time.stimuli;
+
 
 saccTrls = cuedTrls & ~trials.fixBreak & ~trials.saccadeTimeout;
 runData.pWordsGoneBeforeSaccLand = mean(trials.tLanded(saccTrls)>trials.tStimOffset(saccTrls),'omitnan');
@@ -78,11 +86,16 @@ for f = [1 tf]
     end
     fprintf(f,'\n\nEye movement behavior:\n');
     fprintf(f,'Fixation break on %.1f%% of trials\n', 100*runData.pFixBreak);
-    fprintf(f,'Mean saccade latency: %.1f ms\n', 1000*runData.meanSaccLat);
+    fprintf(f,'Median saccade latency: %.1f ms\n', 1000*runData.medianSaccLat);
     fprintf(f,'Saccade too slow on %.1f%% of trials\n', 100*runData.pSaccTooSlow);
     fprintf(f,'Words disappared before saccade landing on %.1f%% of good-sacade trials\n', 100*runData.pWordsGoneBeforeSaccLand);
     fprintf(f,'Words got fixated after saccade on %.1f%% of good-saccade trials\n', 100*runData.pWordsFixated);
             
+    fprintf(f,'\nPercentiles of saccade latency\n');
+    for pp = 1:2
+        fprintf(f,'\t%ith = %.3f', task.idealPreCueDurSaccLatPrctls(pp), runData.saccPrcts(pp));
+    end
+    fprintf(f,'\nRecommended preCueMin: %.3f; preCueMax: %.3f', runData.newPreCueMin, runData.newPreCueMax);
 end
 
 %% print out timing performance 
