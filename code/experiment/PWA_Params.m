@@ -141,8 +141,8 @@ trialSegs = {'fixation','preCue','stimuli','stimDotsISI','dotsPostcueISI','postC
 params.trialSegments = trialSegs;
 
 params.time.fixation            = 0.850;
-params.time.preCueMin           = 0.150;%pre-cue min and max relative to dl's saccade latencies
-params.time.preCueMax           = 0.280; %0.250; %pre-cue duration varies across trials between this min and max 
+params.time.preCueMin           = 0.100;%pre-cue min and max relative to dl's saccade latencies
+params.time.preCueMax           = 0.300;%pre-cue duration varies across trials between this min and max 
 params.time.preCue              = mean([params.time.preCueMin params.time.preCueMax]);
 params.time.stimuli             = 0.075;
 params.time.stimDotsISI         = 0.150; %time between stimulus offset and appearance of dots 
@@ -166,7 +166,8 @@ params.flipLeadFrames = 0.5;        %Within the screen Flip command, how many vi
 %Otherwise, round down. 
 params.durationRoundTolerance = 0.0026; 
 
-%
+%How to set pre-cue min and pre-cue max relative to saccade latency 
+params.idealPreCueDurSaccLatPrctls = [10 70];
 
 %% TEXT
 params.instructTextFont         = 'Ubuntu Light';

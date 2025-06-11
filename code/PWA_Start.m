@@ -3,16 +3,6 @@
 clear all;
 
 %% to do 
-% - decide when and if to present pre-masks
-% - maybe make a different post-cue for invalid trials? 
-   % % draw a rectangle around the location of the target word. Use the
-   % Screen(FrameRect) function. need to give it a rect which is 
-   %[left top right bottom] pixel coordinates relative to upper left corner (0,0)
-   %pick for each trial one of 2 "rects" one for the left, one for the
-   %right, depend on "targSide" for this trial 
-   %In the Trial function, td.targSide is 1 (left) or 2(right) 
-% - finalize stimulus set 
-% - then remake stimuli 
 
 %% do eye-tracking? 0=no, 1=yes
 EYE = 1;
@@ -31,7 +21,11 @@ while isempty(SID)
     SID = input(aquestion, 's');
 end
 
+%% Adjust preCueMin and preCueMax? If not, leave them as empty brackets []
+preCueMin = 0.125;
+preCueMax = 0.204;
 
+   
 %% do eye-tracking?
 keepAskingEye = ~any(EYE == [0 1 999]);
 while keepAskingEye
@@ -56,6 +50,23 @@ params.selfPaced = true;
 params.MRI = false;
 params.openSecondWindow = false;
 
+%adjust precueMin and preCueMax? 
+if ~isempty(preCueMin) & ~isempty(preCueMax)
+    aquestion = sprintf('Do you want to change preCueMin to %.3f and preCueMax to %.3f?\n Enter ''y'' or ''n''\n', preCueMin, preCueMax);
+    acceptChange='x';
+    while ~any(strcmp(acceptChange, {'y','n'}))
+        acceptChange = input(aquestion, 's');
+    end
+    acceptChange = strcmp(acceptChange, 'y');
+    if acceptChange
+        params.time.preCueMin = preCueMin;
+        params.time.preCueMax = preCueMax;
+        fprintf(1,'\nAdjusting preCueMin and preCueMax!!\n\n');
+        pause(2);
+    else
+        fprintf(1,'\nOk, re-setting preCueMin and preCueMax to their defaults of %.3f and %.3f\n', params.time.preCueMin, params.time.preCueMax);
+    end
+end
 %% Practice
 aquestion = 'Do you want to do any practice trials?\n Enter ''y'' or ''n'', or ''d'' for long-duration demo\n';
 doPracticeResp='x';
