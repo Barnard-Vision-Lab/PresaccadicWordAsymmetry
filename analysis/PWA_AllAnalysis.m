@@ -45,6 +45,7 @@ analyzeEach = 2; %0 = no; 1=for subjects with new data not already in allDat tab
 plotEach = 2; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
 
 indivFiles = cell(1,N);
+
 %% Main analyses of performance in each condition
 for si=1:N
     sDir = fullfile(paths.data,subjs{si});
@@ -121,8 +122,7 @@ end
 % save(resFile, 'allR', 'rAvg');
 
 %% Looping through all participants & determining accuracy scores
-% 
-% Definitions and Paths
+%% Definitions and Paths
 file_names = arrayfun(@(id) sprintf('%dAllDat', id), str2double(subjs), 'UniformOutput', false);
  
 %define attention conditions (depending on cue)
@@ -138,7 +138,12 @@ N = length(str2double(subjs)); %how many subjects;
 %pre-define a 3-dimensional matrix that will hold the results (proportion correct in each condition) 
 PCs = NaN(nAttns, nSides, N); % subjects are in the last dimension 
 
-%loop through subjects
+%% Creating one figure for overlayed histograms
+figure; 
+hold on;
+colors = lines(N);
+
+%% Looping through subjects
 for i = 1:N
     % Creating the full file name
     all_data = fullfile(paths.indivRes, [file_names{i} '.csv']);
@@ -149,6 +154,17 @@ for i = 1:N
     goodTrials = d.trialDone==1; % only includes completed trials 
 
     d = d(goodTrials,:);
+
+    %add a variable for the difference between the time of word offset relative to the time of saccade onset
+    d.wordSaccOffOn = cell(size(d.tLanded));
+    d.wordSaccOffOn = d.tLanded-d.tstimDotsISIOns
+
+    %make a histogram of the time of word offset relative to the time of
+    %saccade onset (overlays participants over each other)
+    histogram(d.wordSaccOffOn, ...
+              'FaceColor', colors(i,:), ...
+              'EdgeColor', 'none', ...
+              'FaceAlpha', 0.3); % transparency
 
     %add a variable to this table that says whether each trial was valid,
     %invalid, or neutral 
@@ -186,19 +202,31 @@ for i = 1:N
        end
  end
 
-% Averaging over subjects, and calculating the SEM. (Note that you can now do
-% this afor all conditions at the same time, rather than a separate command
-% for each condition)
+%% Figure Edits
+xline(0, 'r-', 'Word Disappears', 'LabelHorizontalAlignment', 'left');
+xlabel('Difference: tLanded - tstimDotsISIOns');
+ylabel('Count');
+title('Overlayed Histograms of Word Offset Relative to Saccade Onset');
+legend(subjs, 'Location', 'Best');
+hold off;
+ 
+%% Averaging over subjects, and calculating the SEM. 
+% (Note that you can now do this afor all conditions at the same time, 
+% rather than a separate command for each condition)
 
 %meanPCS = mean(PCs, ndims(PCs),'omitnan'); %take the mean over the last dimension 
 %semPCs = standardError(PCs, ndims(PCs));
-
-%% a (very) rough visualization
-plot(PCs);
+% a (very) rough visualization
+figure; 
+hold on;
+plot(PCs); % note that it will be at meanPCS when the next participant is included
+           % right now there is only one participant so it will average
+           % over side (left & right)
 hold on;
 xlabel('Cue Validity');
 xticks([1 2 3])
 xticklabels(cueCond)
 ylabel('Mean Accuracy');
 legend('left','right')
-sgtitle('Mean Accuracy')
+sgtitle('Mean Accuracy per Cue Validity Condition')
+hold off;
