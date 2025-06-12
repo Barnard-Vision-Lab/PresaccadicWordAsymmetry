@@ -12,6 +12,11 @@ clear; close all;
 paths.proj = fileparts(fileparts(which('PWA_AllAnalysis.m')));
 paths.analysis = fullfile(paths.proj,'analysis');
 paths.data = fullfile(paths.proj,'data');
+
+%checking for correct pathing
+fprintf('Project Directory: %s\n', paths.proj);
+fprintf('Looking for data in: %s\n', paths.data);
+
 paths.res = fullfile(paths.proj,'results');
 
 paths.indivRes = fullfile(paths.res,'indiv');
