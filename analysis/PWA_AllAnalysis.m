@@ -3,6 +3,10 @@
 % This script analyzes each subject's trial-level data in the PWA experiment.
 %
 % by Alex L. White, Barnard College 2025
+%
+% It also calculates accuracy and generates some rough plots (in progress)
+% 
+% Mariam Latif
 
 % To Do 
 %  
@@ -16,9 +20,7 @@ paths.data = fullfile(paths.proj,'data');
 %checking for correct pathing
 fprintf('Project Directory: %s\n', paths.proj);
 fprintf('Looking for data in: %s\n', paths.data);
-
 paths.res = fullfile(paths.proj,'results');
-
 paths.indivRes = fullfile(paths.res,'indiv');
 paths.meanRes = fullfile(paths.res, 'mean');
 
@@ -118,5 +120,85 @@ end
 % resFile = fullfile(paths.meanRes,resFileName);
 % save(resFile, 'allR', 'rAvg');
 
-%% make plots of average
+%% Looping through all participants & determining accuracy scores
+% 
+% Definitions and Paths
+file_names = arrayfun(@(id) sprintf('%dAllDat', id), str2double(subjs), 'UniformOutput', false);
+ 
+%define attention conditions (depending on cue)
+cueCond = {'Neutral';'Valid';'Invalid'};
+nAttns = length(cueCond);
 
+%define target sides (which side was post-cued) 
+sides = {'left';'right'};
+nSides = length(sides);
+
+N = length(str2double(subjs)); %how many subjects;
+
+%pre-define a 3-dimensional matrix that will hold the results (proportion correct in each condition) 
+PCs = NaN(nAttns, nSides, N); % subjects are in the last dimension 
+
+%loop through subjects
+for i = 1:N
+    % Creating the full file name
+    all_data = fullfile(paths.indivRes, [file_names{i} '.csv']);
+    % Reading the CSV file into a variable
+    d = readtable(all_data);
+
+    %Filter out trials that were not completed
+    goodTrials = d.trialDone==1; % only includes completed trials 
+
+    d = d(goodTrials,:);
+
+    %add a variable to this table that says whether each trial was valid,
+    %invalid, or neutral 
+
+    % NOTE: for the cued condition this is when tLanded is after tstimDotsISIOns 
+    d.attnCond = cell(size(d.cueValidity));
+    d.attnCond(d.cueValidity==0) = {'Neutral'}; %cueCond 0 is Neutral
+    d.attnCond(d.cueValidity==1 & d.tLanded > d.tstimDotsISIOns) = {'Valid'}; %cue cond is Valid and when tLanded is after tstimDotsISIOns 
+    d.attnCond(d.cueValidity==-1 & d.tLanded > d.tstimDotsISIOns ) = {'Invalid'}; %cue cond is Invalid when tLanded is after tstimDotsISIOns 
+
+    %add target sides
+    d.side = sides(d.targetSide); %targetSide a single number, 1 or 2 
+
+    %loop through attention conditions 
+    for a = 1:nAttns
+        %define a boolean vector that's true for each trial of this
+        %attention condition 
+        attnTrials = strcmp(d.attnCond, cueCond{a});
+
+            %loop through cue target sides 
+            for s = 1:nSides
+               % taking trials on the left or right side
+                    sideTrials = strcmp(d.side, sides{s});
+                %end
+
+                %theseTrials is a Boolean vector that is true only for
+                %trials that are at the intersection of all three types of
+                %conditions
+                theseTrials = attnTrials & sideTrials;
+
+                %now analyze accuracy for each sub-set of trials
+                PCs(a, s, i) = mean(d.respCorrect(theseTrials));
+
+            end
+       end
+ end
+
+% Averaging over subjects, and calculating the SEM. (Note that you can now do
+% this afor all conditions at the same time, rather than a separate command
+% for each condition)
+
+%meanPCS = mean(PCs, ndims(PCs),'omitnan'); %take the mean over the last dimension 
+%semPCs = standardError(PCs, ndims(PCs));
+
+%% a (very) rough visualization
+plot(PCs);
+hold on;
+xlabel('Cue Validity');
+xticks([1 2 3])
+xticklabels(cueCond)
+ylabel('Mean Accuracy');
+legend('left','right')
+sgtitle('Mean Accuracy')
