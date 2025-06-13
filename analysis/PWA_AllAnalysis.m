@@ -7,22 +7,26 @@
 % It also calculates accuracy and generates some rough plots (in progress)
 % 
 % Mariam Latif
-
+%
 % To Do 
-%  
+%
+%%%
 clear; close all;
 
-%% set paths
+% set paths
 paths.proj = fileparts(fileparts(which('PWA_AllAnalysis.m')));
 paths.analysis = fullfile(paths.proj,'analysis');
 paths.data = fullfile(paths.proj,'data');
+paths.results = fullfile(paths.proj,'results');
 
 %checking for correct pathing
 fprintf('Project Directory: %s\n', paths.proj);
 fprintf('Looking for data in: %s\n', paths.data);
-paths.res = fullfile(paths.proj,'results');
-paths.indivRes = fullfile(paths.res,'indiv');
-paths.meanRes = fullfile(paths.res, 'mean');
+
+paths.data = fullfile(paths.proj,'data');
+paths.edf_mat = fullfile(paths.proj,'edf_mat');
+paths.indivRes = fullfile(paths.results,'indiv');
+paths.meanRes = fullfile(paths.results, 'mean');
 
 if ~exist(paths.indivRes, 'dir'), mkdir(paths.indivRes); end
 if ~exist(paths.meanRes, 'dir'), mkdir(paths.meanRes); end
@@ -53,7 +57,18 @@ for si=1:N
     allDatName = fullfile(paths.indivRes,sprintf('%sAllDat.csv',subjs{si}));
     resName = fullfile(paths.indivRes, sprintf('%sRes.mat',subjs{si}));
     indivFiles{si} = resName;
-    
+
+    % This bit of code converts all the participants edf files to mat files
+    % and saves them to the folder 'edf_mat'
+    edfFs = getFilesByType(paths.data,'edf');
+    edfData = cell(1, numel(edfFs));
+    for j = 1:numel(edfFs)
+        filePath = edfFs{j};
+        edfData=Edf2Mat(filePath);
+        newFile = fullfile(paths.edf_mat, sprintf('%s_edf%d.mat', subjs{si}, j));
+        save(newFile, 'edfData')
+    end
+
     %load this subject's table of trial data:
     if doGatherData==2 || (doGatherData==1 && hasNewData(si))
         d = PWA_GatherData(sDir);
@@ -61,8 +76,7 @@ for si=1:N
     else
         d = readtable(allDatName);
     end
-     
-    
+
      %Analyze trials: NEEDS TO BE WRITTEN
 %      if analyzeEach==2 || (analyzeEach==1 && hasNewData(si))
 %          [r, valsByIndex, labelsByIndex] = PWA_AnalyzeSubject(d);
@@ -230,3 +244,81 @@ ylabel('Mean Accuracy');
 legend('left','right')
 sgtitle('Mean Accuracy per Cue Validity Condition')
 hold off;
+
+% %%
+% function eyeDat = processEyeData_RR(behavDat, indivedfFiles, params, textImages, figDir)
+% 
+% if nargin<4 && ~exist('textImages','var')
+%     textImages = [];
+% end
+% 
+% if IsLinux
+%     edfMethod = 2; 
+% else 
+%     edfMethod = 1;
+% end
+% 
+% %% load in EDF file, using Edf2Mat
+% if ~isempty(indivedfFiles)
+%     if edfMethod==1
+%         try
+%             edf = Edf2Mat(blockEDF);
+%             goodEDF = true;
+%             edfMethod = 1;
+%         catch
+%             fprintf(1,'\n\nWARNING: Failed to open edf file with Edf2Mat %s\n', blockEDF((end-26):end));
+%             edfMethod = 2;
+%         end
+%     end
+% 
+%     if edfMethod==2
+%         try
+%             deleteASCs = true;
+%             edfs = readEyelinkData(blockEDF, deleteASCs);
+%             goodEDF = true;
+%             edfMethod = 2;
+% 
+%         catch
+%             fprintf(1,'\n\nWARNING: Failed to open edf file with readEyelinkData %s\n', blockEDF((end-26):end));
+%             keyboard
+%             goodEDF = false;
+%         end
+%     end
+% else
+%     goodEDF = false;
+% end
+% %%
+% if goodEDF
+% 
+% 
+%     eyeDat.hasEDFFile = true(nts,1);
+% 
+%     %PROCESS EACH TRIAL
+%     for ti=1:nts
+%         trial = behavDat.trialNum(ti);
+% 
+%         if edfMethod == 2
+%             edf = edfs(ti);
+% 
+% 
+%             %rename some things from readEyelinkData
+%             edf.Samples.time = edf.timeStamp;
+%             edf.Samples.posX = edf.gazePosX;
+%             edf.Samples.posY = edf.gazePosY;
+%             edf.Samples.pupilSize = edf.pupilSize;
+%             edf.Events.Messages.info  = edf.messages;
+%             edf.Events.Messages.time = edf.messageTimes;
+% 
+%         end
+%         msgs = edf.Events.Messages.info;
+%         msgTimes = edf.Events.Messages.time;
+% 
+%         %pull out gaze positions: in pixels, rounded to integers
+%         posX = round(edf.Samples.posX);
+%         posY = round(edf.Samples.posY);
+% 
+%         %time stamp for each measurement:
+%         time = edf.Samples.time;
+%     end
+% end
+% end
