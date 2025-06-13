@@ -62,10 +62,17 @@ for si=1:N
     % and saves them to the folder 'edf_mat'
     edfFs = getFilesByType(paths.data,'edf');
     edfData = cell(1, numel(edfFs));
+    participantID = subjs{1};
+
+    participantFolder = fullfile(paths.edf_mat, participantID);
+    if ~exist(participantFolder, 'dir')
+        mkdir(participantFolder);
+    end
+
     for j = 1:numel(edfFs)
         filePath = edfFs{j};
         edfData=Edf2Mat(filePath);
-        newFile = fullfile(paths.edf_mat, sprintf('%s_edf%d.mat', subjs{si}, j));
+        newFile = fullfile(participantFolder, sprintf('%s_edf%d.mat', participantID, j));
         save(newFile, 'edfData')
     end
 
