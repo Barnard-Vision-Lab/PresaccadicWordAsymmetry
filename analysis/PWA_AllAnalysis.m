@@ -10,9 +10,10 @@
 %
 % To Do 
 %
-%%%
+%% Clearing!
 clear; close all;
 
+%% Pathing!
 % set paths
 paths.proj = fileparts(fileparts(which('PWA_AllAnalysis.m')));
 paths.analysis = fullfile(paths.proj,'analysis');
@@ -60,7 +61,17 @@ for si=1:N
 
     % This bit of code converts all the participants edf files to mat files
     % and saves them to the folder 'edf_mat'
-    edfFs = getFilesByType(paths.data,'edf');
+
+    % Alex's function: getFilesByType
+    % edfFs = getFilesByType(paths.data,'edf');
+    
+    % NOTE: Practice Files are ignored in the case (3 lines) below (if you would
+    % like them included use the commented case above)
+    % Mariam's function: edfFilesNoPractice
+    participantID = subjs{si};
+    participantPath = fullfile(paths.data, participantID);
+    edfFs = edfFilesNoPractice(participantPath);
+
     edfData = cell(1, numel(edfFs));
     participantID = subjs{1};
 
@@ -83,66 +94,10 @@ for si=1:N
     else
         d = readtable(allDatName);
     end
-
-     %Analyze trials: NEEDS TO BE WRITTEN
-%      if analyzeEach==2 || (analyzeEach==1 && hasNewData(si))
-%          [r, valsByIndex, labelsByIndex] = PWA_AnalyzeSubject(d);
-%          r.subj = subjs{si};
-%          
-%          save(resName, 'r', 'valsByIndex', 'labelsByIndex');
-%      else
-%          load(resName);
-%      end
-%     %for Subject 1, initialize the matrices in allR
-%     vars = fieldnames(r);
-%     vars = setdiff(vars, {'subj','analysisParams','psychometric'});
-%     if si==1
-%         nDimensions = zeros(1,numel(vars));
-%         for vi=1:numel(vars)
-%             eval(sprintf('vsz = size(r.%s);', vars{vi}));
-%             %exclude singleton dimensions
-%             vsz = vsz(vsz>1);
-%             if isempty(vsz), vsz = 1; end
-%             matSz = [vsz N];
-%             nDimensions(vi) = length(vsz);
-%             eval(sprintf('allR.%s = NaN(matSz);', vars{vi}));
-%         end
-%     end
-%     
-%     %save these results in a big maxtrix with all subjects
-%     for vi=1:numel(vars)
-%         colons = repmat(':,', 1, nDimensions(vi));
-%         eval(sprintf('allR.%s(%s %i) = r.%s;', vars{vi}, colons, si, vars{vi}));
-%     end
-%     
-%     if plotEach==2 || (plotEach==1 && hasNewData(si))
-%          %ADD CODE TO PLOT
-%     end
 end
 
-%% average over subjects
-% vars = fieldnames(allR);
-% for vi=1:numel(vars)
-%     eval(sprintf('rAvg.%s = nanmean(allR.%s, ndims(allR.%s));', vars{vi}, vars{vi}, vars{vi}));
-%     eval(sprintf('rAvg.SEM.%s = standardError(allR.%s, ndims(allR.%s));', vars{vi}, vars{vi}, vars{vi}));
-% end
-% 
-% %Save the structure containing all subject results:
-% allR.valsByIndex = valsByIndex;
-% allR.valsByIndex.subject = subjs;
-% 
-% allR.labelsByIndex = labelsByIndex';
-% 
-% rAvg.valsByIndex = valsByIndex;
-% rAvg.labelsByIndex = labelsByIndex';
-% rAvg.analysisParams = r.analysisParams;
-% rAvg.subj = 'Mean';
-% 
-% resFileName = 'PWA_MainRes.mat';
-% resFile = fullfile(paths.meanRes,resFileName);
-% save(resFile, 'allR', 'rAvg');
-
 %% Looping through all participants & determining accuracy scores
+
 %% Definitions and Paths
 file_names = arrayfun(@(id) sprintf('%dAllDat', id), str2double(subjs), 'UniformOutput', false);
  
@@ -252,80 +207,4 @@ legend('left','right')
 sgtitle('Mean Accuracy per Cue Validity Condition')
 hold off;
 
-% %%
-% function eyeDat = processEyeData_RR(behavDat, indivedfFiles, params, textImages, figDir)
-% 
-% if nargin<4 && ~exist('textImages','var')
-%     textImages = [];
-% end
-% 
-% if IsLinux
-%     edfMethod = 2; 
-% else 
-%     edfMethod = 1;
-% end
-% 
-% %% load in EDF file, using Edf2Mat
-% if ~isempty(indivedfFiles)
-%     if edfMethod==1
-%         try
-%             edf = Edf2Mat(blockEDF);
-%             goodEDF = true;
-%             edfMethod = 1;
-%         catch
-%             fprintf(1,'\n\nWARNING: Failed to open edf file with Edf2Mat %s\n', blockEDF((end-26):end));
-%             edfMethod = 2;
-%         end
-%     end
-% 
-%     if edfMethod==2
-%         try
-%             deleteASCs = true;
-%             edfs = readEyelinkData(blockEDF, deleteASCs);
-%             goodEDF = true;
-%             edfMethod = 2;
-% 
-%         catch
-%             fprintf(1,'\n\nWARNING: Failed to open edf file with readEyelinkData %s\n', blockEDF((end-26):end));
-%             keyboard
-%             goodEDF = false;
-%         end
-%     end
-% else
-%     goodEDF = false;
-% end
-% %%
-% if goodEDF
-% 
-% 
-%     eyeDat.hasEDFFile = true(nts,1);
-% 
-%     %PROCESS EACH TRIAL
-%     for ti=1:nts
-%         trial = behavDat.trialNum(ti);
-% 
-%         if edfMethod == 2
-%             edf = edfs(ti);
-% 
-% 
-%             %rename some things from readEyelinkData
-%             edf.Samples.time = edf.timeStamp;
-%             edf.Samples.posX = edf.gazePosX;
-%             edf.Samples.posY = edf.gazePosY;
-%             edf.Samples.pupilSize = edf.pupilSize;
-%             edf.Events.Messages.info  = edf.messages;
-%             edf.Events.Messages.time = edf.messageTimes;
-% 
-%         end
-%         msgs = edf.Events.Messages.info;
-%         msgTimes = edf.Events.Messages.time;
-% 
-%         %pull out gaze positions: in pixels, rounded to integers
-%         posX = round(edf.Samples.posX);
-%         posY = round(edf.Samples.posY);
-% 
-%         %time stamp for each measurement:
-%         time = edf.Samples.time;
-%     end
-% end
-% end
+%% Processing the eye data
