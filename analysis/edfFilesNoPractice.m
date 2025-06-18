@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This function loops though all edf files and does not include practice
+% This function loops through all edf files and does not include practice
 % folders 
 %
 % Made for PWA analysis code June 2025
