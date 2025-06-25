@@ -73,7 +73,7 @@ for si=1:N
     edfFs = edfFilesNoPractice(participantPath);
 
     edfData = cell(1, numel(edfFs));
-    participantID = subjs{1};
+    participantID = subjs{si};
 
     participantFolder = fullfile(paths.edf_mat, participantID);
     if ~exist(participantFolder, 'dir')
@@ -190,12 +190,12 @@ hold off;
 % (Note that you can now do this afor all conditions at the same time, 
 % rather than a separate command for each condition)
 
-%meanPCS = mean(PCs, ndims(PCs),'omitnan'); %take the mean over the last dimension 
-%semPCs = standardError(PCs, ndims(PCs));
+meanPCS = mean(PCs, ndims(PCs),'omitnan'); %take the mean over the last dimension 
+semPCs = standardError(PCs, ndims(PCs));
 % a (very) rough visualization
 figure; 
 hold on;
-plot(PCs); % note that it will be at meanPCS when the next participant is included
+plot(meanPCS); % note that it will be at meanPCS when the next participant is included
            % right now there is only one participant so it will average
            % over side (left & right)
 hold on;
@@ -207,4 +207,4 @@ legend('left','right')
 sgtitle('Mean Accuracy per Cue Validity Condition')
 hold off;
 
-%% Processing the eye data
+
