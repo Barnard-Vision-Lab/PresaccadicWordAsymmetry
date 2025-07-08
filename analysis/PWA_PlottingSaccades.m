@@ -1,9 +1,9 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Processing the eye data
 % Mariam Latif
 % June 2025
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear all;
+clear all; 
 
 %% Pathing
 % Paths (from Mariam's Desktop)
@@ -89,11 +89,21 @@ for p = 1:length(edfDirs)
                 
                 %% Testing for a single trial:
                 goodTrials = find(task.trials.trialDone);
-                for ti=goodTrials'
-                
-                    % Parsing to one trial
-                    startTime = messageTimes(trialStart(ti));
-                    endTime   = messageTimes(trialEnd(ti));
+                for g= 1:length(goodTrials)
+                    ti=goodTrials(g);
+                    if g > length(preCueIdx)|| g> length(postCueIdx)||g>length(trialStart)||g>length(trialEnd)
+                        warning('Skipping trial %d (g=%d): not enough messages.',ti,g);
+                        continue;
+                    end
+                    preCueTime=messageTimes(preCueIdx(g));
+                    postCueTime=messageTimes(postCueIdx(g));
+                    startTime=messageTimes(trialStart(g));
+                    endTime=messageTimes(trialEnd(g));
+                % for ti=goodTrials'
+                % 
+                %     % Parsing to one trial
+                %     startTime = messageTimes(trialStart(ti));
+                %     endTime   = messageTimes(trialEnd(ti));
                     trialSampleIdx = time >= startTime & time <= endTime;
                 
                     % Gaze data for that trial in degrees
@@ -103,9 +113,9 @@ for p = 1:length(edfDirs)
                 
                     % Segmenting a trial
                 
-                    preCueTime = messageTimes(preCueIdx(ti));
-                    %stimDotsTime = messageTimes(stimDotsIdx(ti));
-                    postCueTime = messageTimes(postCueIdx(ti))
+                    % preCueTime = messageTimes(preCueIdx(ti));
+                    % %stimDotsTime = messageTimes(stimDotsIdx(ti));
+                    % postCueTime = messageTimes(postCueIdx(ti))
                     % Segment within the trial
                     %segmentIdx = time >= preCueTime & time <= stimDotsTime;
                     segmentIdx = time >= preCueTime & time <= postCueTime;
@@ -134,6 +144,7 @@ for p = 1:length(edfDirs)
                     velThresh = [20 20]; % 20/s degrees, velThresh is a velocity threshold, which to start you could set to something like 20 deg/s
                     mergeInt = 10; % 10 ms - check!
                     saccs = detectSaccades(postns, velcts, velThresh, minSamples, mergeInt)
+                    %disp(saccs)
                
                     %% Find the "good" saccade
                     % use info in task.saccadeTargets.xDeg and yDeg which are the
@@ -150,36 +161,87 @@ for p = 1:length(edfDirs)
                     % which means trials wasnt completed
                     % - trialDone: 1 if the trial was successfully completed 
                     
-                
-                    %%
-                    % All gaze positions
-                    figure(1); clf; %clear figure 1
-                    legend();
-                    plot(trialX, trialY, 'k-'); % Plot full trial gaze in black
-                    hold on;
-                    plot(segmentX, segmentY, 'r-'); % Plot full segment gaze in red
-                    hold on; 
-                
-                    for i = 1:height(saccs)
-                        sX = saccs.startX(i);
-                        sY = saccs.startY(i);
-                        eX = saccs.endX(i);
-                        eY = saccs.endY(i);
-                
-                        scatter([sX eX], [sY eY], 50,'g', 'filled');
-                        plot([sX eX], [sY eY], 'b-');
+                    % skipping the neutral condition
+                    if task.trials.cuedSide(ti)==0
+                        warning ('Trial %d is neutral cue. Skipping good saccade selection.', ti);
+                        continue;
                     end
+
+                    %finding the cued position
+                    cuedSide = task.trials.cuedSide(ti);  % 1 or 2
+                    targetX = task.saccadeTargets.xDeg(cuedSide);
+                    targetY = task.saccadeTargets.yDeg(cuedSide);
+
+                    %skipping trials with no saccades detected
+                    if isempty(saccs)
+                        warning('No saccades detected in trial %d. Skipping.', ti);
+                        continue;
+                    end
+
+                    %computing starting and endpoint
+                    saccEndX= saccs.endX;
+                    saccEndY = saccs.endY;
+                    distsToTarget = sqrt((saccEndX - targetX).^2 + (saccEndY - targetY).^2);
+
+                    % choosing the saccade with the smallest distance to the cued target
+                    [~, bestIdx] = min(distsToTarget);
+
+                    %extracing the 'good' saccade
+                    goodSaccade = saccs(bestIdx, :);
+                    %goodSaccade = saccs(bestIdx);
+
+                    %plotting
+                    figure(1); clf;
                     hold on;
-                    ylim([-5 5])
-                    xlim([-6 6])
+                    axis equal;
                     xlabel('X Position (deg)');
                     ylabel('Y Position (deg)');
-                    title('Detected Saccades');
+                    title(sprintf('Trial %d: Good Saccade', ti));
+                    hold on;
+                    plot(trialX, trialY, 'k-'); % Plot full trial gaze in black
+                    hold on;
+                    plot([goodSaccade.startX goodSaccade.endX], ...
+                        [goodSaccade.startY goodSaccade.endY], ...
+                        'm-', 'LineWidth', 2);
+                    hold on;
+                    scatter(goodSaccade.endX, goodSaccade.endY, 100, 'm', 'filled');
+                    ylim([-5 5]);
+                    xlim([-6 6]);
                     xline(0)
                     hold on;
                     yline(0)
                     axis equal;
                     hold off;
+                    break;
+                    %%
+                    % All gaze positions
+                    % figure(1); clf; %clear figure 1
+                    % legend();
+                    % plot(trialX, trialY, 'k-'); % Plot full trial gaze in black
+                    % hold on;
+                    % plot(segmentX, segmentY, 'r-'); % Plot full segment gaze in red
+                    % hold on; 
+                    % 
+                    % for i = 1:height(saccs)
+                    %     sX = saccs.startX(i);
+                    %     sY = saccs.startY(i);
+                    %     eX = saccs.endX(i);
+                    %     eY = saccs.endY(i);
+                    % 
+                    %     scatter([sX eX], [sY eY], 50,'g', 'filled');
+                    %     plot([sX eX], [sY eY], 'b-');
+                    % end
+                    % hold on;
+                    % ylim([-5 5])
+                    % xlim([-6 6])
+                    % xlabel('X Position (deg)');
+                    % ylabel('Y Position (deg)');
+                    % title('Detected Saccades');
+                    % xline(0)
+                    % hold on;
+                    % yline(0)
+                    % axis equal;
+                    % hold off;
                 
                     %pause
                 end
