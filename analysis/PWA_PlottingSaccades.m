@@ -202,11 +202,15 @@ for p = 1:length(edfDirs)
                     hold on;
                     plot([goodSaccade.startX goodSaccade.endX], ...
                         [goodSaccade.startY goodSaccade.endY], ...
-                        'm-', 'LineWidth', 2);
+                        'm-', 'LineWidth', 1);
                     hold on;
-                    scatter(goodSaccade.endX, goodSaccade.endY, 100, 'm', 'filled');
-                    ylim([-5 5]);
-                    xlim([-6 6]);
+                    % plotting a marker at the start point 
+                    plot(goodSaccade.startX(1), goodSaccade.startY(1), 'o', 'MarkerFaceColor', 'green', 'MarkerSize', 3);
+                    % plotting a marker at the end point 
+                    plot(goodSaccade.endX(end), goodSaccade.endY(end), 'o', 'MarkerFaceColor', 'blue', 'MarkerSize', 3);
+                    %scatter(goodSaccade.endX, goodSaccade.endY, 100, 'm', 'filled');
+                    %ylim([-3 3]);
+                    xlim([-4 4]);
                     xline(0)
                     hold on;
                     yline(0)
