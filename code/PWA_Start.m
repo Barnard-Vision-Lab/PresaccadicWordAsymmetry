@@ -22,10 +22,9 @@ while isempty(SID)
 end
 
 %% Adjust preCueMin and preCueMax? If not, leave them as empty brackets []
-preCueMin = 0.125;
-preCueMax = 0.204;
+preCueMin = 0.050; % in params the default is 100 ms
+preCueMax = 0.250; % in params the default is 300 ms
 
-   
 %% do eye-tracking?
 keepAskingEye = ~any(EYE == [0 1 999]);
 while keepAskingEye
