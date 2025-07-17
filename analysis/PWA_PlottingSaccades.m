@@ -10,6 +10,13 @@ clear all;
 rootEdfPath = '/Users/mariamlatif/Desktop/VisionLab/PWA/edf_mat/';
 rootDataPath = '/Users/mariamlatif/Desktop/VisionLab/PWA/data/';
 
+paths.proj = fileparts(fileparts(which('PWA_AllAnalysis.m')));
+paths.analysis = fullfile(paths.proj,'analysis');
+rootDataPath = fullfile(paths.proj,'data');
+rootEdfPath = fullfile(paths.proj,'edf_mat');
+paths.results = fullfile(paths.proj,'results');
+
+
 % Directories
 edfDirs = dir(rootEdfPath);
 edfDirs = edfDirs([edfDirs.isdir] & ~startsWith({edfDirs.name}, '.'));
