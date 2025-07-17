@@ -41,10 +41,10 @@ N = numel(subjs);
 
 %% choices 
 %whether mat files should be gathered together into 1 "allDat" table
-doGatherData = 2; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
+doGatherData = 1; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
 
 %whether each subject's data needs to be analyzed (false if res files already exist)
-analyzeEach = 2; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
+analyzeEach = 1; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
 
 %whether each subject's behavioral results should be individually plotted
 plotEach = 2; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
@@ -80,17 +80,17 @@ for si=1:N
         mkdir(participantFolder);
     end
 
-    for j = 1:numel(edfFs)
-        filePath = edfFs{j};
-        edfData=Edf2Mat(filePath);
-        newFile = fullfile(participantFolder, sprintf('%s_edf%d.mat', participantID, j));
-        save(newFile, 'edfData')
-    end
-
     %load this subject's table of trial data:
     if doGatherData==2 || (doGatherData==1 && hasNewData(si))
         d = PWA_GatherData(sDir);
         writetable(d, allDatName);
+
+        for j = 1:numel(edfFs)
+            filePath = edfFs{j};
+            edfData=Edf2Mat(filePath);
+            newFile = fullfile(participantFolder, sprintf('%s_edf%d.mat', participantID, j));
+            save(newFile, 'edfData')
+        end
     else
         d = readtable(allDatName);
     end
