@@ -38,3 +38,4 @@ r.meanSaccLat = mean(d.saccLatency);
 
 %saccade errors: 
 r.meanSaccError = mean(d.saccError);
+r.meanSaccError_horiz = mean(d.saccErrorX);
