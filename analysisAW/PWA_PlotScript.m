@@ -88,7 +88,11 @@ opt.ylims = [0 4];
 opt.yticks = 0:1:4;
 opt.yLab = 'd''';
 
-fontSize = 15;
+%Figure size (in cm) and font size 
+figSize = [15 21]; %wid, height
+fontSize = 20;
+
+
 nRows = 2; nCols = 1;
 figure; 
 
@@ -122,12 +126,15 @@ set(gca,'FontSize', fontSize);
 
 %% Save this figure 
 set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
-set(gcf,'color','w','units','centimeters','pos',[5 5 10 15]);
+set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
 figTitle = fullfile(paths.meanRes,"PWA_dprime_bars.pdf");
 exportgraphics(gcf, figTitle, 'Padding','tight','PreserveAspectRatio','on');
 
 
 %% Plot 2: accuracy vs time (of word onset relative to saccade onset)
+
+%figure size, in cm (width, height)
+figSize = [19 15];
 
 %plot parameters
 neutSats = [0.3 0.3];
@@ -165,6 +172,8 @@ xs = squeeze(rAvg.meanWordOnset_SaccStart(conds.cue, conds.side, conds.length, c
 
 %% Plot
 figure; hold on;
+
+
 %plot borders of bins... or not 
 % for tb=1:length(edges)
 %     plot(edges([tb tb]), ylims, ':', 'Color', [0.7 0.7 0.7]);
@@ -215,6 +224,6 @@ ylim(ylims);
 
 %% Save Figure 2
 set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
-set(gcf,'color','w','units','centimeters','pos',[5 5 13 10]);
+set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
 figTitle = fullfile(paths.meanRes,"PWA_timecourse.pdf");
 exportgraphics(gcf, figTitle, 'Padding','tight','PreserveAspectRatio','on');
