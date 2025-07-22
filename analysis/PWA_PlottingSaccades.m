@@ -241,9 +241,11 @@ for p = 1:length(edfDirs)
                     hold on;
                     plot(trialX, trialY, 'k-'); % Plot full trial gaze in black
                     hold on;
-                    plot([goodSaccade.startX goodSaccade.endX], ...
-                        [goodSaccade.startY goodSaccade.endY], ...
-                        'm-', 'LineWidth', 1);
+                    %plot([goodSaccade.startX goodSaccade.endX], ...
+                        %[goodSaccade.startY goodSaccade.endY], ...
+                        %'m-', 'LineWidth', 1);
+                    saccadeIndices = goodSaccade.onsetSample(1):goodSaccade.offsetSample(1);
+                    plot(trialX(saccadeIndices), trialY(saccadeIndices), 'm-', 'LineWidth', 1);
                     hold on;
                     % plotting a marker at the start point 
                     plot(goodSaccade.startX(1), goodSaccade.startY(1), 'o', 'MarkerFaceColor', 'green', 'MarkerSize', 3);

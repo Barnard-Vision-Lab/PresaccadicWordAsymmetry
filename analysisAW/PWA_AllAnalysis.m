@@ -38,7 +38,7 @@ N = numel(subjs);
 
 %% choices 
 %whether mat files should be gathered together into 1 "allDat" table
-doGatherData = 1; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
+doGatherData = 2; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
 
 %whether each subject's data needs to be analyzed (false if res files already exist)
 analyzeEach = 2; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
