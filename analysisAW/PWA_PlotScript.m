@@ -30,6 +30,7 @@ sideLabs = rAvg.labelsByIndex.targetSide(conds.side);
 
 nCue = length(conds.cue);
 nSide = length(conds.side);
+N = length(allR.subj)
 
 %% extract mean dprime in each condition
 ms = squeeze(rAvg.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
@@ -44,6 +45,7 @@ es = squeeze(rAvg.SEM.dprime(conds.cue, conds.side, conds.length, conds.timeBin,
 %calculate asymmetries in each cue condition: 
 AsM = NaN(nCue, 1); %means of asymmetries
 AsE = NaN(nCue, 1, 2); %error bars: 95% CIs of asymmetries
+indivAs = NaN(nCue, N);
 for cv = 1:nCue
     is = squeeze(allR.dprime(conds.cue(cv), conds.side, conds.length, conds.timeBin, conds.half,:));
     as = diff(is);
@@ -53,6 +55,17 @@ for cv = 1:nCue
     
     AsM(cv) = sampleMean;
     AsE(cv,1,:) = CI;
+    indivAs(cv,:) = as;
+end
+
+%stats comparing asymmetry across cue conditions
+cueComps = [1 2; 1 3; 2 3];
+for cc = 1:size(cueComps,1)
+    cvs = cueComps(cc,:);
+    compAs = indivAs(cvs,:);
+    fprintf(sf, '\nComparing the hemifield asymmetry across %s and %s cue conditions:\n', cueLabs{cvs(1)}, cueLabs{cvs(2)});
+    [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(diff(compAs), 1);
+
 end
 
 % % to make your own prediction graph, set AsM to be diff(ms, 1, 2); 
@@ -111,7 +124,7 @@ asymColr = hsv2rgb(0.7,0.4, 0.85);
 opt.xTickLabs = cueLabs;
 opt.xLab = 'Cued side';
 opt.doLegend = false;
-opt.ylims = [-1 3];
+opt.ylims = [0 4];
 opt.yticks = opt.ylims (1):opt.ylims (2);
 opt.yLab = '\Deltad''';
 opt.edgeColors = 0.7*repmat(asymColr, nCue, 1);
