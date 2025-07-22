@@ -141,7 +141,7 @@ set(gca,'FontSize', fontSize);
 set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
 set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
 figTitle = fullfile(paths.meanRes,"PWA_dprime_bars.pdf");
-exportgraphics(gcf, figTitle, 'Padding','tight','PreserveAspectRatio','on');
+exportgraphics(gcf, figTitle); %, 'Padding','tight','PreserveAspectRatio','on');
 
 
 %% Plot 2: accuracy vs time (of word onset relative to saccade onset)
@@ -239,4 +239,4 @@ ylim(ylims);
 set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
 set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
 figTitle = fullfile(paths.meanRes,"PWA_timecourse.pdf");
-exportgraphics(gcf, figTitle, 'Padding','tight','PreserveAspectRatio','on');
+exportgraphics(gcf, figTitle); %, 'Padding','tight','PreserveAspectRatio','on');
