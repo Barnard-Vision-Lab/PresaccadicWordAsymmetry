@@ -102,7 +102,7 @@ opt.yticks = 0:1:4;
 opt.yLab = 'd''';
 
 %Figure size (in cm) and font size 
-figSize = [15 21]; %wid, height
+figSize = [16 21]; %wid, height
 fontSize = 20;
 
 
@@ -147,7 +147,7 @@ exportgraphics(gcf, figTitle); %, 'Padding','tight','PreserveAspectRatio','on');
 %% Plot 2: accuracy vs time (of word onset relative to saccade onset)
 
 %figure size, in cm (width, height)
-figSize = [19 15];
+figSize = [16 15];
 
 %plot parameters
 neutSats = [0.3 0.3];
@@ -228,9 +228,9 @@ set(gca, 'xtick', xticks,'ytick',yticks);
 xlabs = get(gca,'XTickLabel');
 xlabs{1} = 'Neutral';
 set(gca,'XTickLabel', xlabs,'FontSize', fontSize);
-xlabel('Time before saccade onset (ms)');
+xlabel('Stimulus time before saccade (ms)');
 ylabel('d''')
-title('Accuracy vs Time');
+title('Accuracy over time');
 legend(hs, legLabs,'Location','NorthWest');
 xlim(xlims);
 ylim(ylims);
