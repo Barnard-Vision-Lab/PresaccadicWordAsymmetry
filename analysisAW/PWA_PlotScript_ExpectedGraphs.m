@@ -33,7 +33,7 @@ nSide = length(conds.side);
 
 %% extract mean dprime in each condition
 ms = [0.9 2.4; 1.5 0.85; 0.5 2.6];
-
+%ms = [0.9 2.4; 0.9 2.4; 0.9 2.4];
 %extract standard errors of dprime in each condition 
 es = zeros(3,2);
 
@@ -41,21 +41,6 @@ es = zeros(3,2);
 % the rows are neutral, cue left, right right. The colums are left word, right word. 
 % Then "es" could be set to zeros(3,2) 
 
-%calculate asymmetries in each cue condition: 
-AsM = diff(ms,1,2); %means of asymmetries
-AsE = NaN(nCue, 1, 2); %error bars: 95% CIs of asymmetries
-for cv = 1:nCue
-    is = squeeze(allR.dprime(conds.cue(cv), conds.side, conds.length, conds.timeBin, conds.half,:));
-    as = diff(is);
-
-    fprintf(sf, '\nHemifield asymmetry (R-L dprime) for %s cue condition:\n', cueLabs{cv});
-    [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(as, 1);
-    
-    AsM(cv) = sampleMean;
-    %AsE(cv,1,:) = CI;
-end
-
-% % to make your own prediction graph, set AsM to be diff(ms, 1, 2); 
 
 
 %% plot parameters 
@@ -81,6 +66,7 @@ opt.errorBarColors = opt.edgeColors*0.33;
 
 opt.xTickLabs = cueLabs;
 opt.xLab = 'Cued side';
+opt.doLegend = false;
 opt.legendLabs = sideLabs;
 opt.legendTitle = 'Word side';
 opt.legendLoc = 'North';
@@ -89,8 +75,8 @@ opt.yticks = 0:1:4;
 opt.yLab = 'd''';
 
 %Figure size (in cm) and font size 
-figSize = [15 21]; %wid, height
-fontSize = 20;
+figSize = [14 19]; %wid, height
+fontSize = 25;
 
 
 nRows = 2; nCols = 1;
@@ -104,6 +90,10 @@ set(gca,'FontSize', fontSize)
 
 
 %% Panel B: plot magnitude of asymmetry
+
+AsE = zeros(3,1);
+AsM = diff(ms,1,2);
+
 subplot(nRows,nCols,2); hold on;
 asymColr = hsv2rgb(0.7,0.4, 0.85);
 %plot(xlims, [0 0],'k-');
@@ -119,7 +109,7 @@ opt.fillColors = repmat(asymColr, nCue, 1);
 opt.errorBarColors = 0.5*opt.fillColors;
 opt.barWidth = 0.14;
 
-barPlot_AW([1.5;-.65;2.1], AsE, opt)
+barPlot_AW(AsM, AsE, opt)
 
 title('Hemifield asymmetry (R-L)');
 set(gca,'FontSize', fontSize);
@@ -127,103 +117,7 @@ set(gca,'FontSize', fontSize);
 %% Save this figure 
 set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
 set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
-figTitle = fullfile(paths.meanRes,"PWA_dprime_bars.pdf");
+figTitle = fullfile(paths.meanRes,"PWA_dprime_barsPred2.pdf");
 exportgraphics(gcf, figTitle, 'Padding','tight','PreserveAspectRatio','on');
 
 
-%% Plot 2: accuracy vs time (of word onset relative to saccade onset)
-
-%figure size, in cm (width, height)
-figSize = [19 15];
-
-%plot parameters
-neutSats = [0.3 0.3];
-neutVals = [0.8 0.7];
-neutColrs =  hsv2rgb([hues' neutSats' neutVals']);
-
-neut = find(strcmp(rAvg.labelsByIndex.cuedSide,'Neutral'));
-neutDs = rAvg.dprime(neut, conds.side, conds.length, 1, conds.half);
-neutEs = rAvg.SEM.dprime(neut, conds.side, conds.length, 1, conds.half);
-
-% which conditions to pull out
-cueSs = {'Left','Right'};
-conds.cue = find(ismember(rAvg.labelsByIndex.cuedSide,cueSs));
-cueSs = rAvg.labelsByIndex.cuedSide(conds.cue);
-conds.timeBin = find(~isnan(rAvg.valsByIndex.wordOnsetReSaccTimeBin));
-
-edgeIs = rAvg.valsByIndex.wordOnsetReSaccTimeBin(conds.timeBin);
-edgeIs = [edgeIs edgeIs(end)+1]; %get the right edge of last bin 
-edges = rAvg.wordOnsetTimeBinEdges(edgeIs);
-xvals = cell2mat(rAvg.labelsByIndex.wordOnsetReSaccTimeBin(conds.timeBin));
-
-neutX = -420;
-xlims = [neutX-50 50];
-ylims = [0 4.8];
-xticks = [neutX -300:100:0];
-yticks = 0:1:4;
-
-marks = {'s-','o-'};
-markSz = 10;
-
-%% Extract data
-% ms = squeeze(rAvg.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
-% es = squeeze(rAvg.SEM.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
-% xs = squeeze(rAvg.meanWordOnset_SaccStart(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
-
-%% Plot
-figure; hold on;
-
-
-%plot borders of bins... or not 
-% for tb=1:length(edges)
-%     plot(edges([tb tb]), ylims, ':', 'Color', [0.7 0.7 0.7]);
-% end
-plot([0 0],ylims, 'k-');
-%plot neutrals
-for si=1:2
-    faceColr = neutColrs(si,:);
-    plot(xlims, neutDs([si si]),'-', 'Color',neutColrs(si,:));
-    plot([neutX neutX], neutDs(si)+[-1 1]*neutEs(si), '-','Color', edgeColrs(si,:),'LineWidth',1);
-    plot(neutX, neutDs(si),  marks{si}, 'Color', edgeColrs(si,:), 'MarkerFaceColor',faceColr,'MarkerEdgeColor', edgeColrs(si,:),'markerSize', markSz,'LineWidth',2);
-end
-
-%plot cued trials
-cc = 0; %condition counter
-hs = zeros(1,4);
-legLabs = cell(1,4);
-
-for si=[2 1]
-    for cv=[2 1]
-        cc = cc+1;
-
-        if strcmp(cueSs{cv},'Left'), faceColr = 'w';
-        else, faceColr = edgeColrs(si,:);
-        end
-
-        xvals = squeeze(xs(cv, si,:));
-        for tb=1:length(conds.timeBin)
-            plot(xvals([tb tb]), ms(cv,si,tb)+[-1 1]*es(cv,si,tb), '-','Color', edgeColrs(si,:),'LineWidth',1);
-        end
-        hs(cc)=plot(xvals, squeeze(ms(cv, si, :)), marks{si}, 'Color', edgeColrs(si,:), 'MarkerFaceColor',faceColr,'MarkerEdgeColor', edgeColrs(si,:),'markerSize', markSz,'LineWidth',1);
-        legLabs{cc} = sprintf('%s word, %s cue', sideLabs{si}(1),cueSs{cv}(1));
-
-    end
-end
-
-
-set(gca, 'xtick', xticks,'ytick',yticks);
-xlabs = get(gca,'XTickLabel');
-xlabs{1} = 'Neutral';
-set(gca,'XTickLabel', xlabs,'FontSize', fontSize);
-xlabel('Time before saccade onset (ms)');
-ylabel('d''')
-title('Accuracy vs Time');
-legend(hs, legLabs,'Location','NorthWest');
-xlim(xlims);
-ylim(ylims);
-
-%% Save Figure 2
-set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
-set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
-figTitle = fullfile(paths.meanRes,"PWA_timecourse.pdf");
-exportgraphics(gcf, figTitle, 'Padding','tight','PreserveAspectRatio','on');
