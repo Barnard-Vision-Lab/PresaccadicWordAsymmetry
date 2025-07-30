@@ -112,4 +112,7 @@ resFileName = 'PWA_MainRes.mat';
 resFile = fullfile(paths.meanRes,resFileName);
 save(resFile, 'allR','rAvg');
 
+%% 
+PWA_PlotScript;
+%PWA_IndividualPlotScript;
 

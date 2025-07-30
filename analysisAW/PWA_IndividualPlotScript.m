@@ -1,4 +1,4 @@
-%% Plot mean performance in the PWA experiment 
+%% Plot mean performance in the PWA experiment
 clear; close all;
 
 %find paths
@@ -17,14 +17,14 @@ sf = 1; %where to print stats to (1=command window)
 
 %% plot 1 - bar plot of accuracy for left word, right word in each cue condition (neutral, cue left, cue right)
 
-% % define which conditions to pull out of the "rAvg" structure 
+% % define which conditions to pull out of the "rAvg" structure
 conds.cue = 2:4; %neutral, left, right
-conds.side = 2:3; %left, right 
+conds.side = 2:3; %left, right
 conds.length = 1; %not dividing by word length
 conds.timeBin = 1; %not diviving by time bin relative to saccade
-conds.half = 1; %not splitting data into 1st or 2nd half 
+conds.half = 1; %not splitting data into 1st or 2nd half
 
-%labels for each of these conditions 
+%labels for each of these conditions
 cueLabs = rAvg.labelsByIndex.cuedSide(conds.cue);
 sideLabs = rAvg.labelsByIndex.targetSide(conds.side);
 
@@ -32,14 +32,11 @@ nCue = length(conds.cue);
 nSide = length(conds.side);
 N = length(allR.subj);
 
-%% extract mean dprime in each condition
-ms = squeeze(rAvg.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
-
-%extract standard errors of dprime in each condition 
-es = squeeze(rAvg.SEM.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
+nRows = 3;
+nCols = ceil(N/nRows);
 
 
-%calculate asymmetries in each cue condition: 
+%calculate asymmetries in each cue condition:
 AsM = NaN(nCue, 1); %means of asymmetries
 AsE = NaN(nCue, 1, 2); %error bars: 95% CIs of asymmetries
 indivAs = NaN(nCue, N);
@@ -49,23 +46,13 @@ for cv = 1:nCue
 
     fprintf(sf, '\nHemifield asymmetry (R-L dprime) for %s cue condition:\n', cueLabs{cv});
     [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(as, 1);
-    
+
     AsM(cv) = sampleMean;
     AsE(cv,1,:) = CI;
     indivAs(cv,:) = as;
 end
 
-%stats comparing asymmetry across cue conditions
-cueComps = [1 2; 1 3; 2 3];
-for cc = 1:size(cueComps,1)
-    cvs = cueComps(cc,:);
-    compAs = indivAs(cvs,:);
-    fprintf(sf, '\nComparing the hemifield asymmetry across %s and %s cue conditions:\n', cueLabs{cvs(1)}, cueLabs{cvs(2)});
-    [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(diff(compAs), 1);
-
-end
-
-%% plot parameters 
+%% plot parameters
 % % set the colors for left word, right word
 hues = [0 0.573];
 sats = [0.62 1];
@@ -95,46 +82,32 @@ opt.ylims = [0 4];
 opt.yticks = 0:1:4;
 opt.yLab = 'd''';
 
-%Figure size (in cm) and font size 
-figSize = [16 21]; %wid, height
-fontSize = 20;
+%Figure size (in cm) and font size
+figSize = [22 16]; %wid, height
+fontSize = 11;
 
-
-nRows = 2; nCols = 1;
-figure; 
-
-subplot(nRows, nCols, 1); hold on;
-
-%% Panel A: Plot the means in each condition
-barPlot_AW(ms, es, opt);
-set(gca,'FontSize', fontSize)
-
-
-%% Panel B: plot magnitude of asymmetry
-subplot(nRows,nCols,2); hold on;
-asymColr = hsv2rgb(0.7,0.4, 0.85);
-%plot(xlims, [0 0],'k-');
-
-opt.xTickLabs = cueLabs;
-opt.xLab = 'Cued side';
 opt.doLegend = false;
-opt.ylims = [0 4];
-opt.yticks = opt.ylims (1):opt.ylims (2);
-opt.yLab = '\Deltad''';
-opt.edgeColors = 0.7*repmat(asymColr, nCue, 1);
-opt.fillColors = repmat(asymColr, nCue, 1);
-opt.errorBarColors = 0.5*opt.fillColors;
-opt.barWidth = 0.14;
 
-barPlot_AW(AsM, AsE, opt)
+figure;
+for i = 1:N
+    subplot(nRows, nCols, i); hold on;
 
-title('Hemifield asymmetry (R-L)');
-set(gca,'FontSize', fontSize);
+    % % extract mean dprime in each condition
+    ms = squeeze(allR.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half, i));
 
-%% Save this figure 
+    %extract standard errors of dprime in each condition
+    es = zeros(size(ms));
+
+    barPlot_AW(ms, es, opt);
+    set(gca,'FontSize', fontSize)
+
+    title(allR.subj{i});
+end
+
+% % Save this figure
 set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
 set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
-figTitle = fullfile(paths.meanRes,"PWA_dprime_bars.pdf");
+figTitle = fullfile(paths.meanRes,"PWA_dprime_indivs_bars.pdf");
 exportgraphics(gcf, figTitle); %, 'Padding','tight','PreserveAspectRatio','on');
 
 
@@ -159,7 +132,7 @@ cueSs = rAvg.labelsByIndex.cuedSide(conds.cue);
 conds.timeBin = find(~isnan(rAvg.valsByIndex.wordOnsetReSaccTimeBin));
 
 edgeIs = rAvg.valsByIndex.wordOnsetReSaccTimeBin(conds.timeBin);
-edgeIs = [edgeIs edgeIs(end)+1]; %get the right edge of last bin 
+edgeIs = [edgeIs edgeIs(end)+1]; %get the right edge of last bin
 edges = rAvg.wordOnsetTimeBinEdges(edgeIs);
 xvals = cell2mat(rAvg.labelsByIndex.wordOnsetReSaccTimeBin(conds.timeBin));
 
@@ -181,7 +154,7 @@ xs = squeeze(rAvg.meanWordOnset_SaccStart(conds.cue, conds.side, conds.length, c
 figure; hold on;
 
 
-%plot borders of bins... or not 
+%plot borders of bins... or not
 % for tb=1:length(edges)
 %     plot(edges([tb tb]), ylims, ':', 'Color', [0.7 0.7 0.7]);
 % end
