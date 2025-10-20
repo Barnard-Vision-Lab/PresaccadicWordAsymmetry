@@ -294,7 +294,7 @@ if goodEDF
     catch
         keyboard
     end
-       
+
 
 
     for ti=cuedTrials'
@@ -347,8 +347,10 @@ if goodEDF
             D.nTargetSaccades(ti) = length(theSaccadeI);
 
             if D.nTargetSaccades(ti)>1
-                keyboard
-            elseif D.nTargetSaccades(ti)==1
+                theSaccadeI = theSaccadeI(1); %take the first one
+            end
+            if D.nTargetSaccades(ti)>0
+
                 theSacc = saccs(theSaccadeI,:);
                 D.saccLatency(ti) = theSacc.onsetTime - D.edfTPrecueOn(ti);
                 D.saccStartTime(ti) = theSacc.onsetTime;
@@ -365,16 +367,12 @@ if goodEDF
                 D.saccErrorX(ti) = theSacc.endErrorX;
                 D.saccErrorY(ti) = theSacc.endErrorY;
                 D.saccError(ti) = theSacc.endError;
+
             else
                 fprintf(1,'\nTrial %i no good saccades found!\n', ti)
-
             end
 
-        else
-            D.nTargetSaccades(ti) = 0;
         end
-
-
     end
 else
     D.hasEDFFile = false(nts,1);

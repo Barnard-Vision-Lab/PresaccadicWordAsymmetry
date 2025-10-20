@@ -41,10 +41,10 @@ N = numel(subjs);
 doGatherData = 1; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
 
 %whether each subject's data needs to be analyzed (false if res files already exist)
-analyzeEach = 2; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
+analyzeEach = 1; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
 
 %whether each subject's behavioral results should be individually plotted
-plotEach = 2; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
+plotEach = 1; %0 = no; 1=for subjects with new data not already in allDat table; 2=for everyone;
 
 indivFiles = cell(1,N);
 
@@ -68,8 +68,9 @@ for si=1:N
     if analyzeEach == 2 || (analyzeEach == 1 && hasNewData(si))
         % Perform analysis on the gathered data
        [r, valsByIndex, labelsByIndex] = PWA_AnalyzeSubject(d, resName);
+    else
+        load(indivFiles{si});
     end
-
     %for Subject 1, initialize the matrices in allR
     vars = setdiff(fieldnames(r), {'subj'});
     if si==1
@@ -114,5 +115,5 @@ save(resFile, 'allR','rAvg');
 
 %% 
 PWA_PlotScript;
-%PWA_IndividualPlotScript;
+PWA_IndividualPlotScript;
 
