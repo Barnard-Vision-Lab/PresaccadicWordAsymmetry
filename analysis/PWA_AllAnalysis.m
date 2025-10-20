@@ -6,7 +6,9 @@
 %
 %
 % To Do 
-% - compare to edf's auto-detected saccades
+% - smoothed analysis of p(correct) as a function of time 
+% - lme analysis of p(correct) as a function of time
+% - saccade latency analysis 
 % - for each condition compute number of timeouts, number of  good-saccade trials, etc. 
 % - consider also further filtering trials by saccade accuracy 
 
