@@ -57,7 +57,7 @@ d.targetLength(d.targetSide==2) = d.side2StringLength(d.targetSide==2);
 timeTs = d.cueCond>0 & d.goodSacTrial==1;
 ts = d.wordOnset_SaccStart(timeTs);
 
-timeBins = [-500 -140 -70 0 500];
+timeBins = [-500 -140 -75 0 500];
 [N,edges,binI] = histcounts(ts,timeBins);
 %exclude binI=0 which means trials outside of nay time bin 
 binI(binI==0) = NaN;
