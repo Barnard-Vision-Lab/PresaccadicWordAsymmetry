@@ -80,7 +80,6 @@ opt.legendTitle = 'Word side';
 opt.legendLoc = 'North';
 opt.ylims = [0 4];
 opt.yticks = 0:1:4;
-opt.yLab = 'd''';
 
 %Figure size (in cm) and font size
 figSize = [22 16]; %wid, height
@@ -98,6 +97,19 @@ for i = 1:N
     %extract standard errors of dprime in each condition
     es = zeros(size(ms));
 
+    if i>10
+        opt.doLegend = false;
+        opt.xTickLabs = cueLabs;
+        opt.xLab = 'Cued side';
+        opt.yLab = 'd''';
+
+    else
+        opt.doLegend = false;
+        opt.xTickLabs = '';
+        opt.xLab = '';
+        opt.yLab = '';
+    end
+
     barPlot_AW(ms, es, opt);
     set(gca,'FontSize', fontSize)
 
@@ -109,101 +121,101 @@ set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
 set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
 figTitle = fullfile(paths.meanRes,"PWA_dprime_indivs_bars.pdf");
 exportgraphics(gcf, figTitle); %, 'Padding','tight','PreserveAspectRatio','on');
-
-
-%% Plot 2: accuracy vs time (of word onset relative to saccade onset)
-
-%figure size, in cm (width, height)
-figSize = [16 15];
-
-%plot parameters
-neutSats = [0.3 0.3];
-neutVals = [0.8 0.7];
-neutColrs =  hsv2rgb([hues' neutSats' neutVals']);
-
-neut = find(strcmp(rAvg.labelsByIndex.cuedSide,'Neutral'));
-neutDs = rAvg.dprime(neut, conds.side, conds.length, 1, conds.half);
-neutEs = rAvg.SEM.dprime(neut, conds.side, conds.length, 1, conds.half);
-
-% which conditions to pull out
-cueSs = {'Left','Right'};
-conds.cue = find(ismember(rAvg.labelsByIndex.cuedSide,cueSs));
-cueSs = rAvg.labelsByIndex.cuedSide(conds.cue);
-conds.timeBin = find(~isnan(rAvg.valsByIndex.wordOnsetReSaccTimeBin));
-
-edgeIs = rAvg.valsByIndex.wordOnsetReSaccTimeBin(conds.timeBin);
-edgeIs = [edgeIs edgeIs(end)+1]; %get the right edge of last bin
-edges = rAvg.wordOnsetTimeBinEdges(edgeIs);
-xvals = cell2mat(rAvg.labelsByIndex.wordOnsetReSaccTimeBin(conds.timeBin));
-
-neutX = -420;
-xlims = [neutX-50 50];
-ylims = [0 4.8];
-xticks = [neutX -300:100:0];
-yticks = 0:1:4;
-
-marks = {'s-','o-'};
-markSz = 10;
-
-%% Extract data
-ms = squeeze(rAvg.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
-es = squeeze(rAvg.SEM.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
-xs = squeeze(rAvg.meanWordOnset_SaccStart(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
-
-%% Plot
-figure; hold on;
-
-
-%plot borders of bins... or not
-% for tb=1:length(edges)
-%     plot(edges([tb tb]), ylims, ':', 'Color', [0.7 0.7 0.7]);
+% 
+% 
+% %% Plot 2: accuracy vs time (of word onset relative to saccade onset)
+% 
+% %figure size, in cm (width, height)
+% figSize = [16 15];
+% 
+% %plot parameters
+% neutSats = [0.3 0.3];
+% neutVals = [0.8 0.7];
+% neutColrs =  hsv2rgb([hues' neutSats' neutVals']);
+% 
+% neut = find(strcmp(rAvg.labelsByIndex.cuedSide,'Neutral'));
+% neutDs = rAvg.dprime(neut, conds.side, conds.length, 1, conds.half);
+% neutEs = rAvg.SEM.dprime(neut, conds.side, conds.length, 1, conds.half);
+% 
+% % which conditions to pull out
+% cueSs = {'Left','Right'};
+% conds.cue = find(ismember(rAvg.labelsByIndex.cuedSide,cueSs));
+% cueSs = rAvg.labelsByIndex.cuedSide(conds.cue);
+% conds.timeBin = find(~isnan(rAvg.valsByIndex.wordOnsetReSaccTimeBin));
+% 
+% edgeIs = rAvg.valsByIndex.wordOnsetReSaccTimeBin(conds.timeBin);
+% edgeIs = [edgeIs edgeIs(end)+1]; %get the right edge of last bin
+% edges = rAvg.wordOnsetTimeBinEdges(edgeIs);
+% xvals = cell2mat(rAvg.labelsByIndex.wordOnsetReSaccTimeBin(conds.timeBin));
+% 
+% neutX = -420;
+% xlims = [neutX-50 50];
+% ylims = [0 4.8];
+% xticks = [neutX -300:100:0];
+% yticks = 0:1:4;
+% 
+% marks = {'s-','o-'};
+% markSz = 10;
+% 
+% %% Extract data
+% ms = squeeze(rAvg.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
+% es = squeeze(rAvg.SEM.dprime(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
+% xs = squeeze(rAvg.meanWordOnset_SaccStart(conds.cue, conds.side, conds.length, conds.timeBin, conds.half));
+% 
+% %% Plot
+% figure; hold on;
+% 
+% 
+% %plot borders of bins... or not
+% % for tb=1:length(edges)
+% %     plot(edges([tb tb]), ylims, ':', 'Color', [0.7 0.7 0.7]);
+% % end
+% plot([0 0],ylims, 'k-');
+% %plot neutrals
+% for si=1:2
+%     faceColr = neutColrs(si,:);
+%     plot(xlims, neutDs([si si]),'-', 'Color',neutColrs(si,:));
+%     plot([neutX neutX], neutDs(si)+[-1 1]*neutEs(si), '-','Color', edgeColrs(si,:),'LineWidth',1);
+%     plot(neutX, neutDs(si),  marks{si}, 'Color', edgeColrs(si,:), 'MarkerFaceColor',faceColr,'MarkerEdgeColor', edgeColrs(si,:),'markerSize', markSz,'LineWidth',2);
 % end
-plot([0 0],ylims, 'k-');
-%plot neutrals
-for si=1:2
-    faceColr = neutColrs(si,:);
-    plot(xlims, neutDs([si si]),'-', 'Color',neutColrs(si,:));
-    plot([neutX neutX], neutDs(si)+[-1 1]*neutEs(si), '-','Color', edgeColrs(si,:),'LineWidth',1);
-    plot(neutX, neutDs(si),  marks{si}, 'Color', edgeColrs(si,:), 'MarkerFaceColor',faceColr,'MarkerEdgeColor', edgeColrs(si,:),'markerSize', markSz,'LineWidth',2);
-end
-
-%plot cued trials
-cc = 0; %condition counter
-hs = zeros(1,4);
-legLabs = cell(1,4);
-
-for si=[2 1]
-    for cv=[2 1]
-        cc = cc+1;
-
-        if strcmp(cueSs{cv},'Left'), faceColr = 'w';
-        else, faceColr = edgeColrs(si,:);
-        end
-
-        xvals = squeeze(xs(cv, si,:));
-        for tb=1:length(conds.timeBin)
-            plot(xvals([tb tb]), ms(cv,si,tb)+[-1 1]*es(cv,si,tb), '-','Color', edgeColrs(si,:),'LineWidth',1);
-        end
-        hs(cc)=plot(xvals, squeeze(ms(cv, si, :)), marks{si}, 'Color', edgeColrs(si,:), 'MarkerFaceColor',faceColr,'MarkerEdgeColor', edgeColrs(si,:),'markerSize', markSz,'LineWidth',1);
-        legLabs{cc} = sprintf('%s word, %s cue', sideLabs{si}(1),cueSs{cv}(1));
-
-    end
-end
-
-
-set(gca, 'xtick', xticks,'ytick',yticks);
-xlabs = get(gca,'XTickLabel');
-xlabs{1} = 'Neutral';
-set(gca,'XTickLabel', xlabs,'FontSize', fontSize);
-xlabel('Stimulus time before saccade (ms)');
-ylabel('d''')
-title('Accuracy over time');
-legend(hs, legLabs,'Location','NorthWest');
-xlim(xlims);
-ylim(ylims);
-
-%% Save Figure 2
-set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
-set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
-figTitle = fullfile(paths.meanRes,"PWA_timecourse.pdf");
-exportgraphics(gcf, figTitle); %, 'Padding','tight','PreserveAspectRatio','on');
+% 
+% %plot cued trials
+% cc = 0; %condition counter
+% hs = zeros(1,4);
+% legLabs = cell(1,4);
+% 
+% for si=[2 1]
+%     for cv=[2 1]
+%         cc = cc+1;
+% 
+%         if strcmp(cueSs{cv},'Left'), faceColr = 'w';
+%         else, faceColr = edgeColrs(si,:);
+%         end
+% 
+%         xvals = squeeze(xs(cv, si,:));
+%         for tb=1:length(conds.timeBin)
+%             plot(xvals([tb tb]), ms(cv,si,tb)+[-1 1]*es(cv,si,tb), '-','Color', edgeColrs(si,:),'LineWidth',1);
+%         end
+%         hs(cc)=plot(xvals, squeeze(ms(cv, si, :)), marks{si}, 'Color', edgeColrs(si,:), 'MarkerFaceColor',faceColr,'MarkerEdgeColor', edgeColrs(si,:),'markerSize', markSz,'LineWidth',1);
+%         legLabs{cc} = sprintf('%s word, %s cue', sideLabs{si}(1),cueSs{cv}(1));
+% 
+%     end
+% end
+% 
+% 
+% set(gca, 'xtick', xticks,'ytick',yticks);
+% xlabs = get(gca,'XTickLabel');
+% xlabs{1} = 'Neutral';
+% set(gca,'XTickLabel', xlabs,'FontSize', fontSize);
+% xlabel('Stimulus time before saccade (ms)');
+% ylabel('d''')
+% title('Accuracy over time');
+% legend(hs, legLabs,'Location','NorthWest');
+% xlim(xlims);
+% ylim(ylims);
+% 
+% %% Save Figure 2
+% set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
+% set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
+% figTitle = fullfile(paths.meanRes,"PWA_timecourse.pdf");
+% exportgraphics(gcf, figTitle); %, 'Padding','tight','PreserveAspectRatio','on');

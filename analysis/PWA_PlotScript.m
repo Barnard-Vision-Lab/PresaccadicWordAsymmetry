@@ -13,7 +13,7 @@ paths.meanRes = fullfile(paths.results, 'mean');
 resFile = fullfile(paths.meanRes,'PWA_MainRes.mat');
 load(resFile, 'allR','rAvg');
 
-sf = 1; %where to print stats to (1=command window)
+sf = fopen(fullfile(paths.meanRes, 'PWAStats.txt'),'w'); %where to print stats to (1=command window)
 
 %% plot 1 - bar plot of accuracy for left word, right word in each cue condition (neutral, cue left, cue right)
 
@@ -48,7 +48,7 @@ for cv = 1:nCue
     as = diff(is);
 
     fprintf(sf, '\nHemifield asymmetry (R-L dprime) for %s cue condition:\n', cueLabs{cv});
-    [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(as, 1);
+    [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(as, sf);
     
     AsM(cv) = sampleMean;
     AsE(cv,1,:) = CI;
@@ -61,9 +61,31 @@ for cc = 1:size(cueComps,1)
     cvs = cueComps(cc,:);
     compAs = indivAs(cvs,:);
     fprintf(sf, '\nComparing the hemifield asymmetry across %s and %s cue conditions:\n', cueLabs{cvs(1)}, cueLabs{cvs(2)});
-    [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(diff(compAs), 1);
+    [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(diff(compAs), sf);
 
 end
+
+%cue benefits and costs for each position 
+neutI = find(strcmp(cueLabs, 'Neutral'));
+for si = 1:2 %left word, right word
+    fprintf(sf,'\n\nCue effects for words on the %s:\n', sideLabs{si});
+    for bc = 1:2 %benefit, cost
+        if bc==1
+            compI = find(strcmp(cueLabs, sideLabs{si}));
+            fprintf(sf,'\nCue benefit (%s cue - %s cue):\n\t', cueLabs{compI}, cueLabs{neutI});
+
+        else
+            compI = find(strcmp(cueLabs, sideLabs{3-si}));
+            fprintf(sf,'\nCue cost (%s cue - %s cue):\n\t', cueLabs{compI}, cueLabs{neutI});
+            
+        end
+            
+        is = squeeze(allR.dprime(conds.cue([neutI compI]), conds.side(si), conds.length, conds.timeBin, conds.half,:));
+        [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(diff(is), sf);
+
+    end
+end
+
 
 %% plot parameters 
 % % set the colors for left word, right word
@@ -91,12 +113,12 @@ opt.xLab = 'Cued side';
 opt.legendLabs = sideLabs;
 opt.legendTitle = 'Word side';
 opt.legendLoc = 'North';
-opt.ylims = [0 4];
+opt.ylims = [0 3.5];
 opt.yticks = 0:1:4;
 opt.yLab = 'd''';
 
 %Figure size (in cm) and font size 
-figSize = [16 21]; %wid, height
+figSize = [15 19]; %wid, height
 fontSize = 20;
 
 
@@ -118,8 +140,8 @@ asymColr = hsv2rgb(0.7,0.4, 0.85);
 opt.xTickLabs = cueLabs;
 opt.xLab = 'Cued side';
 opt.doLegend = false;
-opt.ylims = [0 4];
-opt.yticks = opt.ylims (1):opt.ylims (2);
+opt.ylims = [0 3.5];
+opt.yticks = opt.ylims(1):opt.ylims(2);
 opt.yLab = '\Deltad''';
 opt.edgeColors = 0.7*repmat(asymColr, nCue, 1);
 opt.fillColors = repmat(asymColr, nCue, 1);
@@ -141,7 +163,7 @@ exportgraphics(gcf, figTitle); %, 'Padding','tight','PreserveAspectRatio','on');
 %% Plot 2: accuracy vs time (of word onset relative to saccade onset)
 
 %figure size, in cm (width, height)
-figSize = [16 15];
+figSize = [15 13];
 
 %plot parameters
 neutSats = [0.3 0.3];
@@ -164,9 +186,9 @@ edgeIs = [edgeIs edgeIs(end)+1]; %get the right edge of last bin
 edges = rAvg.wordOnsetTimeBinEdges(edgeIs);
 xvals = cell2mat(rAvg.labelsByIndex.wordOnsetReSaccTimeBin(conds.timeBin));
 
-neutX = -300;
-xlims = [neutX-50 10];
-ylims = [0 4.8];
+neutX = -285;
+xlims = [neutX-40 20];
+ylims = [0 4.2];
 xticks = [neutX -200:50:0];
 yticks = 0:1:4;
 
@@ -228,16 +250,18 @@ end
 set(gca, 'xtick', xticks,'ytick',yticks);
 xlabs = get(gca,'XTickLabel');
 xlabs{1} = 'Neutral';
+xlabs{3} = '';
+xlabs{5} = '';
 set(gca,'XTickLabel', xlabs,'FontSize', fontSize);
-xlabel('Time btwn. saccade onset and word onset (ms)');
+xtickangle(0);
+xlabel('Time btwn. saccade and word onset (ms)');
 ylabel('d''')
 title('Accuracy as time approaches the saccade');
 legend(hs, legLabs,'Location','NorthWest');
 xlim(xlims);
 ylim(ylims);
 
-%% Save Figure 2
-figSize = [18 18]; %wid, height
+% % Save Figure 2
 
 set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal','FontSize',fontSize);
 set(gcf,'color','w','units','centimeters','pos',[5 5 figSize]);
