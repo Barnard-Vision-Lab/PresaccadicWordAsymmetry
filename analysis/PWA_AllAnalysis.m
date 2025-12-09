@@ -119,3 +119,5 @@ save(resFile, 'allR','rAvg');
 PWA_PlotScript;
 %PWA_IndividualPlotScript;
 
+%%
+[df,p,BF] = analyzeLatencies(allR);
