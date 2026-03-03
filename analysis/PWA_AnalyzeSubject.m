@@ -40,6 +40,8 @@ d.goodSacTrial(d.cueCond==0) = d.trialDone(d.cueCond==0) == 1;
 
 goodTrials = find(d.goodSacTrial);
 
+% % calculate how many trials we have to exclude because the word appeared too late, and the saccade had already started
+r.propCuedTrials_WordTooLate = mean(d.wordOffset_SaccStart(d.trialDone==1 & d.cueCond>0)>0);
 
 %add half. "total trial num" covers all trials in the table
 d.totalTrialNum = NaN(size(d.trialDone));
@@ -57,9 +59,10 @@ d.targetLength(d.targetSide==2) = d.side2StringLength(d.targetSide==2);
 timeTs = d.cueCond>0 & d.goodSacTrial==1;
 ts = d.wordOnset_SaccStart(timeTs);
 
-timeBins = [-500 -135 -73 0 500];
+timeBins = [-500 -135 -73 0];
+nTimeBins = length(timeBins)-1;
 [N,edges,binI] = histcounts(ts,timeBins);
-%exclude binI=0 which means trials outside of nay time bin 
+%exclude binI=0 which means trials outside of any time bin 
 binI(binI==0) = NaN;
 
 d.wordOnsetReSaccTimeBin = NaN(size(d.blockNum));
@@ -102,6 +105,17 @@ end
 if bpi == 1, dSz=[1 nLevsPerParam]; 
 else dSz = nLevsPerParam; end
 
+%% check possible missing time bins for this subject 
+bp = 'wordOnsetReSaccTimeBin';
+timeBinDim = find(strcmp(splitParams, bp ));
+if nLevsPerParam(timeBinDim)~=(nTimeBins+1)
+    nLevsPerParam(timeBinDim)=nTimeBins+1;
+    ulevs = 1:nTimeBins;
+    for li=1:nTimeBins
+        eval(sprintf('splitTrials.%s{li+%i}=find(d.%s==ulevs(li));',bp,nextra,bp));
+        eval(sprintf('valsByIndex.%s(li+%i)=ulevs(li);',bp,nextra));
+    end    
+end
 
 %% add text labels for each condition
 for bpi=1:numel(splitParams)
