@@ -15,6 +15,20 @@ load(resFile, 'allR','rAvg');
 
 sf = fopen(fullfile(paths.meanRes, 'PWAStats.txt'),'w'); %where to print stats to (1=command window)
 
+%% print stats on precue dur and number of trials that had to be tossed out b/c the saccade started before the word disappeared
+tls = squeeze(allR.propCuedTrials_WordTooLate);
+fprintf(sf,'\nProportion of trials that were excluded because the saccade started before the word disappeared:\n');
+fprintf(sf,'\tMean=%.3f, STD = %.3f, range=[%.3f %.3f]\n', mean(tls), standardError(tls), min(tls), max(tls));
+
+pcds = squeeze(allR.meanCueWordSOA);
+pcdRng = squeeze(allR.rangeCueWordSOA);
+
+fprintf(sf,'\nPre-cue durations, which equal the time between the cue onset and the word onset:\n');
+fprintf(sf,'\tAcross trial average for each subject: Mean=%.3f, STD = %.3f, range=[%.3f %.3f]\n', mean(pcds), standardError(pcds), min(pcds), max(pcds));
+fprintf(sf,'\tAcross trial MIN for each subject: Mean=%.3f, STD = %.3f, range=[%.3f %.3f]\n', mean(pcdRng(1,:)), standardError(pcdRng(1,:)), min(pcdRng(1,:)), max(pcdRng(1,:)));
+fprintf(sf,'\tAcross trial MAX for each subject: Mean=%.3f, STD = %.3f, range=[%.3f %.3f]\n', mean(pcdRng(2,:)), standardError(pcdRng(2,:)), min(pcdRng(2,:)), max(pcdRng(2,:)));
+
+
 %% plot 1 - bar plot of accuracy for left word, right word in each cue condition (neutral, cue left, cue right)
 
 % % define which conditions to pull out of the "rAvg" structure 

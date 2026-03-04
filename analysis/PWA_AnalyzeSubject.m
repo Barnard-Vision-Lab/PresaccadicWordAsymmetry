@@ -40,8 +40,16 @@ d.goodSacTrial(d.cueCond==0) = d.trialDone(d.cueCond==0) == 1;
 
 goodTrials = find(d.goodSacTrial);
 
-% % calculate how many trials we have to exclude because the word appeared too late, and the saccade had already started
+%% calculate how many trials we have to exclude because the word appeared too late, and the saccade had already started
 r.propCuedTrials_WordTooLate = mean(d.wordOffset_SaccStart(d.trialDone==1 & d.cueCond>0)>0);
+
+%and the average precue duration (the time between precue onset and words onset) 
+pcds = d.preCueDur(d.trialDone==1 & d.cueCond>0);
+r.meanCueWordSOA = mean(pcds,'omitnan');
+r.rangeCueWordSOA = [min(pcds) max(pcds)];
+
+
+%% 
 
 %add half. "total trial num" covers all trials in the table
 d.totalTrialNum = NaN(size(d.trialDone));
